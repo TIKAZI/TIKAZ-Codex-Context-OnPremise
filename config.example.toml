@@ -1,0 +1,9 @@
+[adapters]
+ffmpeg = 'G:\\Tools\\ffmpeg\\ffmpeg.exe'
+whisper_python = 'G:\\TokenForge\\whisper\\.venv\\Scripts\\python.exe'
+whisper_model = 'G:\\TokenForge\\models\\faster-whisper-large-v3'
+
+[runtime]
+gpu_serial = true
+allow_remote = false
+

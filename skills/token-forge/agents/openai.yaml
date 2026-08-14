@@ -1,0 +1,4 @@
+interface:
+  display_name: "上下文-TokenForge"
+  short_description: "调用多种本地依赖完成上下文转换、检索、重排与保真压缩"
+  default_prompt: "Use $token-forge to turn these local sources into a verified, token-efficient context pack."

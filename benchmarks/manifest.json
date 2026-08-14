@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "release-migration",
+      "source_file": "fixtures/release-migration.md",
+      "query": "prepare the database migration evidence",
+      "budget_tokens": 70,
+      "protected": ["v2.4.1", "2026-09-01", "python migrate.py --target v2.4.1"]
+    },
+    {
+      "id": "short-dense-error",
+      "source_file": "fixtures/short-dense-error.md",
+      "query": "diagnose the connection error",
+      "budget_tokens": 100,
+      "protected": ["E_CONN_42", "https://example.com/log"]
+    },
+    {
+      "id": "protected-budget-conflict",
+      "source_file": "fixtures/protected-budget-conflict.md",
+      "query": "prepare contract approval",
+      "budget_tokens": 12,
+      "protected": ["v7.4.2", "2026-10-31", "250000.00", "APPROVAL_FIN_9"]
+    },
+    {
+      "id": "long-retrieval",
+      "source_file": "fixtures/long-redundant-brief.md",
+      "query": "database migration rollback evidence",
+      "budget_tokens": 85,
+      "protected": ["v5.8.0", "2026-11-15", "python db_migrate.py --release v5.8.0", "MIGRATION_OK_58"]
+    },
+    {
+      "id": "code-pass-through",
+      "source_file": "fixtures/high-risk-code.py",
+      "query": "review the deployment code",
+      "budget_tokens": 20,
+      "safety_class": "code",
+      "protected": ["v8.1.0", "https://api.example.com/v1", "DEPLOY_ERR_81"]
+    },
+    {
+      "id": "contract-pass-through",
+      "source_file": "fixtures/high-risk-contract.md",
+      "query": "summarize obligations",
+      "budget_tokens": 20,
+      "safety_class": "contract",
+      "protected": ["CN-2026-0814", "980000.00", "2027-08-14"]
+    },
+    {
+      "id": "table-pass-through",
+      "source_file": "fixtures/high-risk-table.csv",
+      "query": "summarize totals",
+      "budget_tokens": 20,
+      "safety_class": "table",
+      "protected": ["INV-4401", "188000.50", "2026-12-20"]
+    }
+  ]
+}

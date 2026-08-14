@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+dist/
+build/
+*.egg-info/
+.token-forge/
+.token-forge.local.toml
+benchmark-results/
+
