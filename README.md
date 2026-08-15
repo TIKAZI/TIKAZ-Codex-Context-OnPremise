@@ -29,7 +29,7 @@ files / webpages / media / code / conversations
 
 ## Development status
 
-The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. Heavy converters, hybrid retrieval, reranking, and LLMLingua-2 remain gated integrations; unavailable paths are reported instead of simulated.
+The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The optional adapter package layer is now installed in isolated G-drive environments; model weights and adapter-specific quality gates remain explicit. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
 
 ## Evidence before claims
 

@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from token_forge.adapters import AdapterSpec, probe_adapter
+from token_forge.adapters import AdapterSpec, default_adapter_specs, probe_adapter
 
 
 class AdapterTests(unittest.TestCase):
@@ -19,7 +19,24 @@ class AdapterTests(unittest.TestCase):
         self.assertFalse(status.available)
         self.assertIsNone(status.executable)
 
+    def test_all_optional_adapters_accept_explicit_isolated_paths(self):
+        configured = {
+            "markitdown": "G:/envs/documents/markitdown.exe",
+            "docling": "G:/envs/documents/docling.exe",
+            "mineru": "G:/envs/mineru/mineru.exe",
+            "paddleocr": "G:/envs/paddleocr/paddleocr.exe",
+            "defuddle": "G:/node/defuddle.CMD",
+            "playwright": "G:/node/playwright.CMD",
+            "yt_dlp": "G:/envs/media/yt-dlp.exe",
+            "scenedetect": "G:/envs/media/scenedetect.exe",
+            "retrieval_python": "G:/envs/retrieval/python.exe",
+            "llmlingua_python": "G:/envs/llmlingua/python.exe",
+        }
+        specs = {spec.name: spec for spec in default_adapter_specs(configured)}
+        for key, path in configured.items():
+            expected_name = key.replace("_", "-")
+            self.assertEqual(specs[expected_name].candidates[0], path)
+
 
 if __name__ == "__main__":
     unittest.main()
-

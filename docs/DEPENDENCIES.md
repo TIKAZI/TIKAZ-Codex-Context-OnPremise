@@ -13,6 +13,10 @@
 | Retrieval | BM25 + BGE-M3 | BM25 | fixed-query recall passes |
 | Reranking | domain-tested BGE reranker | fused retrieval order | no domain regression |
 | Prose compression | LLMLingua-2 | extractive selection/pass-through | facts, anchors and grounding pass |
+| Legacy Office | LibreOffice headless conversion | source preservation | converted structure and declared facts survive |
+| Platform media | official subtitles, platform-specific workflow, yt-dlp | source URL | authorization and transcript checks pass |
+| Email/archive | EML/MSG parser, 7-Zip | inventory/source preservation | bounded extraction and path-safety checks pass |
+
+See `FORMAT_MATRIX.md` for extensions and explicit non-universal cases, and `INSTALL_LAYOUT.md` for isolated runtime and cache paths.
 
 Dependencies are installed into isolated G-drive environments after their profile passes the fixed benchmark. The repository stores adapters and version manifests, not environments or model weights.
-

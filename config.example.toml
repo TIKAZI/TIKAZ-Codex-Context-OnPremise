@@ -2,8 +2,22 @@
 ffmpeg = 'G:\\Tools\\ffmpeg\\ffmpeg.exe'
 whisper_python = 'G:\\TokenForge\\whisper\\.venv\\Scripts\\python.exe'
 whisper_model = 'G:\\TokenForge\\models\\faster-whisper-large-v3'
+markitdown = 'G:\\CodexTools\\token-forge\\envs\\documents\\Scripts\\markitdown.exe'
+docling = 'G:\\CodexTools\\token-forge\\envs\\documents\\Scripts\\docling.exe'
+mineru = 'G:\\CodexTools\\token-forge\\envs\\mineru\\Scripts\\mineru.exe'
+paddleocr = 'G:\\CodexTools\\token-forge\\envs\\paddleocr\\Scripts\\paddleocr.exe'
+defuddle = 'G:\\CodexTools\\token-forge\\node\\node_modules\\.bin\\defuddle.CMD'
+playwright = 'G:\\CodexTools\\token-forge\\node\\node_modules\\.bin\\playwright.CMD'
+yt_dlp = 'G:\\CodexTools\\token-forge\\envs\\media\\Scripts\\yt-dlp.exe'
+scenedetect = 'G:\\CodexTools\\token-forge\\envs\\media\\Scripts\\scenedetect.exe'
+retrieval_python = 'G:\\CodexTools\\token-forge\\envs\\retrieval\\Scripts\\python.exe'
+llmlingua_python = 'G:\\CodexTools\\token-forge\\envs\\llmlingua\\Scripts\\python.exe'
+embedding_model = 'G:\\CodexTools\\models\\token-forge\\bge-m3'
+reranker_model = 'G:\\CodexTools\\models\\token-forge\\bge-reranker-v2-m3'
+llmlingua_model = 'G:\\CodexTools\\models\\token-forge\\llmlingua-2'
+cache_root = 'F:\\TIKAZ-Token-Forge-Data\\cache'
+output_root = 'F:\\TIKAZ-Token-Forge-Data\\outputs'
 
 [runtime]
 gpu_serial = true
 allow_remote = false
-

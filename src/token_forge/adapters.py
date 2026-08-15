@@ -29,6 +29,16 @@ def probe_adapter(spec: AdapterSpec) -> AdapterStatus:
             continue
         explicit = Path(os.path.expandvars(candidate)).expanduser()
         if explicit.exists():
+            if spec.name in {"embedding-model", "reranker-model", "llmlingua-model"}:
+                # A partially-created Hugging Face directory is not a usable model.
+                has_config = (explicit / "config.json").is_file()
+                has_weights = any(
+                    path.suffix in {".safetensors", ".bin"} and path.stat().st_size > 1_000_000
+                    for path in explicit.glob("*")
+                    if path.is_file()
+                )
+                if not (has_config and has_weights):
+                    continue
             return AdapterStatus(spec.name, True, str(explicit.resolve()))
         located = shutil.which(candidate)
         if located:
@@ -40,12 +50,19 @@ def default_adapter_specs(configured: Mapping[str, str] | None = None) -> tuple[
     configured = configured or {}
     return (
         AdapterSpec("ffmpeg", tuple(filter(None, (configured.get("ffmpeg"), os.getenv("TOKEN_FORGE_FFMPEG"), "ffmpeg", "ffmpeg.cmd")))),
-        AdapterSpec("markitdown", ("markitdown",)),
-        AdapterSpec("docling", ("docling",)),
-        AdapterSpec("mineru", ("mineru",)),
-        AdapterSpec("paddleocr", ("paddleocr",)),
-        AdapterSpec("defuddle", ("defuddle",)),
-        AdapterSpec("playwright", ("playwright",)),
+        AdapterSpec("markitdown", tuple(filter(None, (configured.get("markitdown"), "markitdown")))),
+        AdapterSpec("docling", tuple(filter(None, (configured.get("docling"), "docling")))),
+        AdapterSpec("mineru", tuple(filter(None, (configured.get("mineru"), "mineru")))),
+        AdapterSpec("paddleocr", tuple(filter(None, (configured.get("paddleocr"), "paddleocr")))),
+        AdapterSpec("defuddle", tuple(filter(None, (configured.get("defuddle"), "defuddle")))),
+        AdapterSpec("playwright", tuple(filter(None, (configured.get("playwright"), "playwright")))),
+        AdapterSpec("yt-dlp", tuple(filter(None, (configured.get("yt_dlp"), "yt-dlp")))),
+        AdapterSpec("scenedetect", tuple(filter(None, (configured.get("scenedetect"), "scenedetect")))),
+        AdapterSpec("retrieval-python", tuple(filter(None, (configured.get("retrieval_python"),)))),
+        AdapterSpec("llmlingua-python", tuple(filter(None, (configured.get("llmlingua_python"),)))),
+        AdapterSpec("embedding-model", tuple(filter(None, (configured.get("embedding_model"),)))),
+        AdapterSpec("reranker-model", tuple(filter(None, (configured.get("reranker_model"),)))),
+        AdapterSpec("llmlingua-model", tuple(filter(None, (configured.get("llmlingua_model"),)))),
         AdapterSpec("whisper-python", tuple(filter(None, (configured.get("whisper_python"), os.getenv("TOKEN_FORGE_WHISPER_PYTHON"))))),
         AdapterSpec("whisper-model", tuple(filter(None, (configured.get("whisper_model"), os.getenv("TOKEN_FORGE_WHISPER_MODEL"))))),
     )
