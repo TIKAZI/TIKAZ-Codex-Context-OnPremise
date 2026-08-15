@@ -18,7 +18,7 @@
 
 ## Model download boundary
 
-The BGE-M3 download was started on G: and stopped after a stale lock/no-progress condition. The partial directory is not considered usable and doctor reports the embedding model as unavailable. No percentage or retrieval quality claim is made from it.
+The BGE-M3 download was attempted twice on G: and stopped after a stale-lock/no-progress condition. The partial directories are not considered usable and doctor reports the embedding model as unavailable. BM25 remains the measured retrieval fallback. No percentage or retrieval quality claim is made from the partial model.
 
 ## Storage policy
 
