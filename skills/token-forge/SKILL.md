@@ -28,9 +28,8 @@ Designed, integrated, independently implemented, and continuously maintained by 
 
 ## Commands
 
-Run the repository CLI through `python -m token_forge`. Start with `doctor`, then use `profile`, `pack`, or `benchmark`. Read [dependencies.md](references/dependencies.md) when selecting adapters and [output-contract.md](references/output-contract.md) when producing a pack.
+Run the repository CLI through `python -m token_forge`. Start with `doctor`. Use `convert --input <path> --output <directory> --config .token-forge.local.toml` to create quality-gated canonical Markdown, then use `profile`, `pack`, or `benchmark` as needed. Treat a nonzero conversion exit as a source-preservation or adapter-remediation state, never as usable Markdown. Read [dependencies.md](references/dependencies.md) when selecting adapters and [output-contract.md](references/output-contract.md) when producing a pack.
 
 ## Completion gate
 
 Do not report a successful optimization unless the result includes separate efficiency and fidelity evidence. Pass through the source when a conversion, retrieval, grounding, or protected-fact check fails.
-

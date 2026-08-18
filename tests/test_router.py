@@ -21,6 +21,12 @@ class RouterTests(unittest.TestCase):
         self.assertEqual(profile.route, "table-safe")
         self.assertFalse(profile.learned_compression_allowed)
 
+    def test_local_html_routes_to_web_extraction_not_code(self):
+        profile = profile_source("saved-article.html")
+        self.assertEqual(profile.family, "web")
+        self.assertEqual(profile.route, "extract")
+        self.assertEqual(profile.adapter_candidates[:2], ("defuddle", "markitdown"))
+
 
 if __name__ == "__main__":
     unittest.main()

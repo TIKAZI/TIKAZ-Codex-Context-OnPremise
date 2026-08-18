@@ -1,14 +1,14 @@
-# Local installation status (2026-08-15)
+# Local installation status (2026-08-18)
 
 ## Package and command layer
 
 | Adapter | Installed version | Command/import smoke | Model/quality gate |
 |---|---:|---|---|
-| MarkItDown | 0.1.7 | passed on local HTML | pending representative PDF/Office fixtures |
+| MarkItDown | 0.1.7 | CLI adapter and fallback passed on local HTML | pending representative PDF/Office fixtures |
 | Docling | 2.120.1 | command/version passed; HTML model init did not finish in window | pending |
 | MinerU | 3.4.5 | command/version passed | model download and complex-PDF gate pending |
 | PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | command/version passed | model download and OCR gate pending; CPU baseline |
-| Defuddle | 0.19.2 | passed on local HTML | dynamic-page gate pending |
+| Defuddle | 0.19.2 | primary CLI adapter passed on fixed local HTML | dynamic-page gate pending |
 | Playwright | 1.62.1 + Chromium 151 | real headless launch passed | dynamic-page fixture pending |
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
 | PySceneDetect | 0.7.1 | version passed | real video fixture pending |
@@ -19,6 +19,10 @@
 ## Model download boundary
 
 The BGE-M3 download was attempted twice on G: and stopped after a stale-lock/no-progress condition. The partial directories are not considered usable and doctor reports the embedding model as unavailable. BM25 remains the measured retrieval fallback. No percentage or retrieval quality claim is made from the partial model.
+
+## Verified conversion slice
+
+The fixed `tests/fixtures/web-article.html` smoke passed through Defuddle 0.19.2. The generated Markdown retained the declared version `v9.2.1`, date `2026-12-01`, and command `python migrate.py --target v9.2.1`; the conversion ledger reported protected-literal recall `1.0`. This proves the checked fixture only. Dynamic pages, arbitrary websites, PDF, Office, OCR, tables, and image fidelity remain separate gates.
 
 ## Storage policy
 

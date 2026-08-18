@@ -7,6 +7,7 @@ from pathlib import Path
 from .adapters import probe_all
 from .benchmark import run_manifest
 from .config import load_config
+from .conversion import convert_source
 from .pipeline import build_text_pack
 from .router import profile_source
 
@@ -21,6 +22,13 @@ def _parser() -> argparse.ArgumentParser:
     profile = sub.add_parser("profile", help="Route a source without processing it")
     profile.add_argument("--input", required=True)
     profile.add_argument("--query", default="")
+
+    convert = sub.add_parser("convert", help="Convert a source into quality-gated canonical Markdown")
+    convert.add_argument("--input", required=True, type=Path)
+    convert.add_argument("--output", required=True, type=Path)
+    convert.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown"), default="auto")
+    convert.add_argument("--timeout", type=int, default=120)
 
     pack = sub.add_parser("pack", help="Build a deterministic text context pack")
     pack.add_argument("--input", required=True, type=Path)
@@ -55,6 +63,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "profile":
         print(json.dumps(profile_source(args.input).__dict__, ensure_ascii=False, indent=2))
         return 0
+    if args.command == "convert":
+        config = load_config(args.config)
+        result = convert_source(
+            args.input,
+            args.output,
+            config.adapters,
+            requested_adapter=args.adapter,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        if result.success:
+            return 0
+        return 3 if result.status == "unavailable" else 2
     if args.command == "pack":
         source = args.input.read_text(encoding="utf-8")
         safety_class = profile_source(str(args.input)).family if args.safety_class == "auto" else args.safety_class

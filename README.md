@@ -27,9 +27,22 @@ files / webpages / media / code / conversations
 - GPU stages run sequentially on a single 16 GB card unless measured otherwise.
 - Estimated token counts are never presented as provider billing telemetry.
 
+## Quick start
+
+```powershell
+$env:PYTHONPATH='src'
+python -m token_forge doctor --config .token-forge.local.toml
+python -m token_forge convert `
+  --input path\to\article.html `
+  --output path\to\result `
+  --config .token-forge.local.toml
+```
+
+`convert` currently routes local HTML through Defuddle and falls back to MarkItDown. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, and protected-literal recall. If a converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
+
 ## Development status
 
-The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The optional adapter package layer is now installed in isolated G-drive environments; model weights and adapter-specific quality gates remain explicit. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
+The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first production adapter chain now performs quality-gated local HTML conversion with Defuddle-to-MarkItDown fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
 
 ## Evidence before claims
 

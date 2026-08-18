@@ -4,7 +4,7 @@
 
 - [x] Define source profiles, routes, adapter status, protected literals, and cost ledgers.
 - [x] Implement deterministic text packing with pass-through for unsafe inputs.
-- [x] Add CLI commands for doctor, profile, pack, and benchmark.
+- [x] Add CLI commands for doctor, profile, convert, pack, and benchmark.
 
 Checkpoint: unit tests pass and no external dependency is required.
 
@@ -12,8 +12,9 @@ Checkpoint: unit tests pass and no external dependency is required.
 
 - [x] Connect the existing faster-whisper environment through configuration.
 - [x] Install isolated G-drive environments for MarkItDown, Docling, MinerU, Defuddle, Playwright, PaddleOCR, media utilities, retrieval, and prose compression.
-- [ ] Add subprocess adapters for MarkItDown, Docling, MinerU, Defuddle, Playwright, PaddleOCR, yt-dlp, and PySceneDetect.
-- [ ] Record commands, versions, timings, failures, and source hashes.
+- [x] Add quality-gated Defuddle and MarkItDown subprocess adapters for local HTML.
+- [x] Record converter versions, timings, failures, fallback attempts, source hashes, and protected-literal recall.
+- [ ] Add subprocess adapters for Docling, MinerU, Playwright, PaddleOCR, yt-dlp, and PySceneDetect.
 
 Checkpoint: each adapter passes one fixed fixture before it is eligible for routing.
 

@@ -7,6 +7,7 @@ from .models import SourceProfile
 
 
 TEXT = {".md", ".txt", ".rst", ".json", ".jsonl", ".yaml", ".yml"}
+WEB = {".html", ".htm", ".mhtml"}
 TABLE = {".csv", ".tsv"}
 DOCUMENT = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".odt", ".epub"}
 MEDIA = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".mp4", ".mov", ".mkv", ".avi", ".webm"}
@@ -14,7 +15,7 @@ IMAGE = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 CODE = {
     ".py", ".js", ".jsx", ".ts", ".tsx", ".rs", ".go", ".java", ".kt",
     ".c", ".cc", ".cpp", ".h", ".hpp", ".cs", ".php", ".rb", ".swift",
-    ".sql", ".sh", ".ps1", ".bat", ".toml", ".xml", ".html", ".css",
+    ".sql", ".sh", ".ps1", ".bat", ".toml", ".xml", ".css",
 }
 
 
@@ -24,6 +25,8 @@ def profile_source(source: str) -> SourceProfile:
         return SourceProfile(source, "web", "", "extract", ("defuddle", "playwright", "readability"), True)
 
     suffix = Path(source).suffix.lower()
+    if suffix in WEB:
+        return SourceProfile(source, "web", suffix, "extract", ("defuddle", "markitdown", "playwright"), True)
     if suffix in TABLE:
         return SourceProfile(source, "table", suffix, "table-safe", (), False)
     if suffix in CODE:
