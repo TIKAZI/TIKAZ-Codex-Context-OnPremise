@@ -27,7 +27,7 @@ def _parser() -> argparse.ArgumentParser:
     convert.add_argument("--input", required=True, type=Path)
     convert.add_argument("--output", required=True, type=Path)
     convert.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
-    convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown"), default="auto")
+    convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown", "docling"), default="auto")
     convert.add_argument("--timeout", type=int, default=120)
 
     pack = sub.add_parser("pack", help="Build a deterministic text context pack")
@@ -71,6 +71,7 @@ def main(argv: list[str] | None = None) -> int:
             config.adapters,
             requested_adapter=args.adapter,
             timeout_seconds=args.timeout,
+            allow_remote=config.allow_remote,
         )
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         if result.success:

@@ -11,3 +11,4 @@ A context pack must contain:
 - cache key and whether the result was a verified persistent-cache hit;
 - raw, canonical, selected, compressed, and final token counts kept separate;
 - fidelity checks and explicit pass-through or failure state.
+- conversion verification level (`source-literal` or `output-only`) and nullable protected-literal recall when the source cannot be independently extracted.

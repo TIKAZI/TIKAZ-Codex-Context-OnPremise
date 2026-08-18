@@ -33,16 +33,16 @@ files / webpages / media / code / conversations
 $env:PYTHONPATH='src'
 python -m token_forge doctor --config .token-forge.local.toml
 python -m token_forge convert `
-  --input path\to\article.html `
+  --input path\to\source.pdf `
   --output path\to\result `
   --config .token-forge.local.toml
 ```
 
-`convert` currently routes local HTML through Defuddle and falls back to MarkItDown. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, and protected-literal recall. If a converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
+`convert` routes local HTML through Defuddle, and documents/PDF through MarkItDown with Docling available as an explicit fallback. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, verification level, and protected-literal recall. HTML and DOCX/PPTX can be source-literal checked; binary PDF conversion is currently reported as `output-only` unless an independent source extractor is configured. If a source-literal converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
 
 ## Development status
 
-The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first production adapter chain now performs quality-gated local HTML conversion with Defuddle-to-MarkItDown fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
+The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first document adapter slice now performs local HTML and PDF conversion with explicit verification levels and safe fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
 
 ## Evidence before claims
 

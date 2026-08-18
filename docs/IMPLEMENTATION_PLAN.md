@@ -14,7 +14,10 @@ Checkpoint: unit tests pass and no external dependency is required.
 - [x] Install isolated G-drive environments for MarkItDown, Docling, MinerU, Defuddle, Playwright, PaddleOCR, media utilities, retrieval, and prose compression.
 - [x] Add quality-gated Defuddle and MarkItDown subprocess adapters for local HTML.
 - [x] Record converter versions, timings, failures, fallback attempts, source hashes, and protected-literal recall.
-- [ ] Add subprocess adapters for Docling, MinerU, Playwright, PaddleOCR, yt-dlp, and PySceneDetect.
+- [x] Add MarkItDown PDF conversion and an explicit `output-only` verification state.
+- [x] Add Docling invocation with isolated output staging; keep it disabled by the quality gate until local model artifacts are available.
+- [x] Extract source literals from DOCX/PPTX XML before allowing conversion success.
+- [ ] Add subprocess adapters for MinerU, Playwright, PaddleOCR, yt-dlp, and PySceneDetect.
 
 Checkpoint: each adapter passes one fixed fixture before it is eligible for routing.
 

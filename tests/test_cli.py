@@ -32,6 +32,7 @@ class ConvertCliTests(unittest.TestCase):
                 output_path=str(output / "canonical.md"),
                 protected_literals=("v1.2.3",),
                 protected_recall=1.0,
+                verification_level="source-literal",
                 elapsed_ms=7,
             )
 
@@ -55,6 +56,7 @@ class ConvertCliTests(unittest.TestCase):
                 {"defuddle": "G:/tools/defuddle.cmd"},
                 requested_adapter="defuddle",
                 timeout_seconds=45,
+                allow_remote=False,
             )
 
     def test_convert_uses_distinct_exit_codes_for_unavailable_and_failed(self) -> None:
@@ -68,6 +70,7 @@ class ConvertCliTests(unittest.TestCase):
             output_path=None,
             protected_literals=(),
             protected_recall=1.0,
+            verification_level="source-literal",
             elapsed_ms=1,
         )
         with tempfile.TemporaryDirectory() as temp:

@@ -3,12 +3,16 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
+import tempfile
 import time
+import zipfile
 from dataclasses import asdict, dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Callable, Mapping, Sequence
+from xml.etree import ElementTree
 
 from .protection import extract_protected_literals, protected_recall
 from .router import profile_source
@@ -42,7 +46,8 @@ class ConversionResult:
     adapter_version: str | None
     output_path: str | None
     protected_literals: tuple[str, ...]
-    protected_recall: float
+    protected_recall: float | None
+    verification_level: str
     elapsed_ms: int
     attempts: tuple[ConversionAttempt, ...] = field(default_factory=tuple)
 
@@ -101,19 +106,82 @@ def _run_process(command: Sequence[str], timeout_seconds: int) -> ProcessOutcome
     return ProcessOutcome(completed.returncode, completed.stdout, completed.stderr)
 
 
-def _command(adapter: str, executable: str, source: Path, destination: Path) -> list[str]:
+def _version_command(adapter: str, executable: str) -> list[str]:
+    if adapter == "docling":
+        return [executable, "convert", "--version"]
+    return [executable, "--version"]
+
+
+def _command(
+    adapter: str,
+    executable: str,
+    source: Path,
+    destination: Path,
+    artifacts_path: str | None = None,
+) -> tuple[list[str], Path, Path | None]:
     if adapter == "defuddle":
-        return [executable, "parse", str(source), "--markdown", "--output", str(destination)]
+        return (
+            [executable, "parse", str(source), "--markdown", "--output", str(destination)],
+            destination,
+            None,
+        )
     if adapter == "markitdown":
-        return [executable, str(source), "-o", str(destination)]
+        return [executable, str(source), "-o", str(destination)], destination, None
+    if adapter == "docling":
+        staging = Path(tempfile.mkdtemp(prefix=".docling-", dir=destination.parent))
+        command = [
+                executable,
+                "convert",
+                str(source),
+                "--to",
+                "md",
+                "--output",
+                str(staging),
+                "--no-ocr",
+                "--no-tables",
+                "--abort-on-error",
+                "--quiet",
+            ]
+        if artifacts_path:
+            command[8:8] = ["--artifacts-path", artifacts_path]
+        return (
+            command,
+            staging / f"{source.stem}.md",
+            staging,
+        )
     raise ValueError(f"adapter is not implemented: {adapter}")
 
 
-def _source_literals(source: Path) -> tuple[str, ...]:
-    if source.suffix.lower() not in {".html", ".htm", ".mhtml", ".md", ".txt", ".rst", ".json", ".jsonl", ".yaml", ".yml"}:
-        return ()
+def _ooxml_text(source: Path) -> str:
+    suffix = source.suffix.lower()
+    if suffix == ".docx":
+        prefixes = ("word/document.xml", "word/header", "word/footer", "word/footnotes.xml", "word/endnotes.xml")
+    elif suffix == ".pptx":
+        prefixes = ("ppt/slides/slide", "ppt/notesSlides/notesSlide")
+    else:
+        return ""
+
+    parts: list[str] = []
+    try:
+        with zipfile.ZipFile(source) as archive:
+            for name in sorted(archive.namelist()):
+                if not name.endswith(".xml") or not name.startswith(prefixes):
+                    continue
+                root = ElementTree.fromstring(archive.read(name))
+                parts.extend(value for value in root.itertext() if value.strip())
+    except (OSError, zipfile.BadZipFile, ElementTree.ParseError):
+        return ""
+    return "\n".join(parts)
+
+
+def _source_literals(source: Path) -> tuple[str, ...] | None:
+    suffix = source.suffix.lower()
+    if suffix in {".docx", ".pptx"}:
+        return extract_protected_literals(_ooxml_text(source))
+    if suffix not in {".html", ".htm", ".mhtml", ".md", ".txt", ".rst", ".json", ".jsonl", ".yaml", ".yml"}:
+        return None
     text = source.read_text(encoding="utf-8", errors="replace")
-    if source.suffix.lower() in {".html", ".htm", ".mhtml"}:
+    if suffix in {".html", ".htm", ".mhtml"}:
         text = _html_visible_text(text)
     return extract_protected_literals(text)
 
@@ -133,6 +201,7 @@ def convert_source(
     requested_adapter: str = "auto",
     timeout_seconds: int = 120,
     runner: Runner | None = None,
+    allow_remote: bool = False,
 ) -> ConversionResult:
     if not source.is_file():
         raise FileNotFoundError(source)
@@ -143,32 +212,44 @@ def convert_source(
     invoke = runner or _run_process
     profile = profile_source(str(source))
     source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
-    protected = _source_literals(source)
+    protected_source = _source_literals(source)
+    protected = protected_source or ()
+    verification_level = "source-literal" if protected_source is not None else "output-only"
     canonical = output_dir / "canonical.md"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    implemented = {"defuddle", "markitdown"}
+    implemented = {"defuddle", "markitdown", "docling"}
     if requested_adapter == "auto":
         candidates = [
             name for name in profile.adapter_candidates
             if name in implemented and adapters.get(name)
+            and (name != "docling" or adapters.get("docling_artifacts") or allow_remote)
         ]
     else:
         if requested_adapter not in implemented:
             raise ValueError(f"adapter is not implemented: {requested_adapter}")
         candidates = [requested_adapter] if adapters.get(requested_adapter) else []
+        if requested_adapter == "docling" and not (adapters.get("docling_artifacts") or allow_remote):
+            candidates = []
 
     attempts: list[ConversionAttempt] = []
-    best_recall = 1.0 if not protected else 0.0
+    best_recall: float | None = None if protected_source is None else (1.0 if not protected else 0.0)
     final_status = "unavailable"
     for adapter in candidates:
         executable = adapters[adapter]
-        version_outcome = invoke([executable, "--version"], timeout_seconds)
+        version_outcome = invoke(_version_command(adapter, executable), timeout_seconds)
         version = (version_outcome.stdout or version_outcome.stderr).strip().splitlines()
         version_text = version[0][:200] if version else None
         canonical.unlink(missing_ok=True)
         attempt_started = time.perf_counter()
-        outcome = invoke(_command(adapter, executable, source, canonical), timeout_seconds)
+        command, produced_path, cleanup_root = _command(
+            adapter,
+            executable,
+            source,
+            canonical,
+            adapters.get("docling_artifacts"),
+        )
+        outcome = invoke(command, timeout_seconds)
         elapsed_ms = round((time.perf_counter() - attempt_started) * 1000)
 
         if outcome.returncode != 0:
@@ -179,19 +260,24 @@ def convert_source(
                     (outcome.stderr or outcome.stdout).strip()[:2000],
                 )
             )
+            if cleanup_root:
+                shutil.rmtree(cleanup_root, ignore_errors=True)
             continue
-        if not canonical.is_file() or not canonical.read_text(encoding="utf-8", errors="replace").strip():
+        if not produced_path.is_file() or not produced_path.read_text(encoding="utf-8", errors="replace").strip():
             final_status = "quality-failed"
             attempts.append(
                 ConversionAttempt(adapter, "empty-output", outcome.returncode, version_text, elapsed_ms)
             )
             canonical.unlink(missing_ok=True)
+            if cleanup_root:
+                shutil.rmtree(cleanup_root, ignore_errors=True)
             continue
 
-        converted = canonical.read_text(encoding="utf-8", errors="replace")
-        recall = protected_recall(protected, converted)
-        best_recall = max(best_recall, recall)
-        if recall < 1.0:
+        converted = produced_path.read_text(encoding="utf-8", errors="replace")
+        recall = protected_recall(protected, converted) if protected_source is not None else None
+        if recall is not None:
+            best_recall = max(best_recall or 0.0, recall)
+        if recall is not None and recall < 1.0:
             final_status = "quality-failed"
             attempts.append(
                 ConversionAttempt(
@@ -200,8 +286,14 @@ def convert_source(
                 )
             )
             canonical.unlink(missing_ok=True)
+            if cleanup_root:
+                shutil.rmtree(cleanup_root, ignore_errors=True)
             continue
 
+        if produced_path != canonical:
+            canonical.write_text(converted, encoding="utf-8")
+        if cleanup_root:
+            shutil.rmtree(cleanup_root, ignore_errors=True)
         attempts.append(ConversionAttempt(adapter, "success", outcome.returncode, version_text, elapsed_ms))
         result = ConversionResult(
             success=True,
@@ -214,6 +306,7 @@ def convert_source(
             output_path=str(canonical.resolve()),
             protected_literals=protected,
             protected_recall=recall,
+            verification_level=verification_level,
             elapsed_ms=round((time.perf_counter() - started) * 1000),
             attempts=tuple(attempts),
         )
@@ -232,6 +325,7 @@ def convert_source(
         output_path=None,
         protected_literals=protected,
         protected_recall=best_recall,
+        verification_level=verification_level,
         elapsed_ms=round((time.perf_counter() - started) * 1000),
         attempts=tuple(attempts),
     )
