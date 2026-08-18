@@ -6,8 +6,8 @@
 |---|---:|---|---|
 | MarkItDown | 0.1.7 | HTML fallback and PDF conversion passed | PDF/Office source-literal gate pending |
 | Docling | 2.120.1 | command/version passed; PDF smoke timed out while fetching layout model | disabled without local artifacts; remote fetch requires explicit opt-in |
-| MinerU | 3.4.5 | command/version passed | model download and complex-PDF gate pending |
-| PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | command/version passed | model download and OCR gate pending; CPU baseline |
+| MinerU | 3.4.5 | CLI adapter implemented for `pipeline + ocr` | local pipeline models and OCR quality gate pending |
+| PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | CLI exposes Office `doc2md` and cloud API | installed CLI is not a local scanned-PDF OCR route |
 | Defuddle | 0.19.2 | primary CLI adapter passed on fixed local HTML | dynamic-page gate pending |
 | Playwright | 1.62.1 + Chromium 151 | real headless launch passed | dynamic-page fixture pending |
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
@@ -27,6 +27,8 @@ The fixed `tests/fixtures/web-article.html` smoke passed through Defuddle 0.19.2
 The local PDF smoke passed through MarkItDown 0.1.7 in about 2 seconds. Because the current controller has no independent PDF text extractor configured, its ledger correctly reports `verification_level: output-only` and `protected_recall: null`; an independent pypdf check of this synthetic sample matched the generated Markdown, but that check is not generalized into the adapter claim. Docling 2.120.1 was invoked with OCR and table models disabled and timed out after 180 seconds while fetching a layout model, so it remains a fallback candidate rather than an enabled default.
 
 With the default `allow_remote=false`, the controller refuses Docling unless `adapters.docling_artifacts` points to pre-cached local artifacts.
+
+The fixed image-only PDF was rendered and visually inspected, and pypdf confirmed that it had no text layer. MarkItDown returned empty output; Token Forge then returned `needs-ocr` with exit code `4`, wrote only the failure ledger, and did not invoke MinerU because no local `mineru_config` was present. This verifies routing and source preservation, not OCR accuracy.
 
 ## Storage policy
 

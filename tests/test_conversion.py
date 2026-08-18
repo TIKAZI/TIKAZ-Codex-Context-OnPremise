@@ -9,6 +9,72 @@ from token_forge.conversion import ProcessOutcome, convert_source
 
 
 class ConversionTests(unittest.TestCase):
+    def test_scanned_pdf_reports_needs_ocr_when_no_local_ocr_adapter_is_ready(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "scan.pdf"
+            source.write_bytes(b"%PDF-1.4\nimage-only")
+
+            def runner(command: Sequence[str], timeout: int) -> ProcessOutcome:
+                if "--version" in command:
+                    return ProcessOutcome(0, "markitdown 0.1.7", "")
+                destination = Path(command[command.index("-o") + 1])
+                destination.write_text("", encoding="utf-8")
+                return ProcessOutcome(0, "", "")
+
+            result = convert_source(
+                source,
+                root / "output",
+                {"markitdown": "markitdown.exe", "mineru": "mineru.exe"},
+                runner=runner,
+            )
+
+            self.assertFalse(result.success)
+            self.assertEqual(result.status, "needs-ocr")
+            self.assertEqual([attempt.status for attempt in result.attempts], ["empty-output"])
+
+    def test_scanned_pdf_escalates_to_configured_local_mineru(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "scan.pdf"
+            source.write_bytes(b"%PDF-1.4\nimage-only")
+            mineru_config = root / "mineru.json"
+            mineru_config.write_text('{"models-dir":{"pipeline":"G:/models/mineru"}}', encoding="utf-8")
+
+            def runner(command: Sequence[str], timeout: int) -> ProcessOutcome:
+                if "--version" in command:
+                    return ProcessOutcome(0, f"{Path(command[0]).stem} 1.0", "")
+                if "markitdown" in Path(command[0]).stem:
+                    destination = Path(command[command.index("-o") + 1])
+                    destination.write_text("", encoding="utf-8")
+                    return ProcessOutcome(0, "", "")
+                self.assertIn("ocr", command)
+                self.assertIn("pipeline", command)
+                destination = Path(command[command.index("-o") + 1])
+                nested = destination / "scan" / "ocr"
+                nested.mkdir(parents=True)
+                (nested / "scan.md").write_text(
+                    "Version v6.7.8\n\nRelease date 2026-08-18",
+                    encoding="utf-8",
+                )
+                return ProcessOutcome(0, "", "")
+
+            result = convert_source(
+                source,
+                root / "output",
+                {
+                    "markitdown": "markitdown.exe",
+                    "mineru": "mineru.exe",
+                    "mineru_config": str(mineru_config),
+                },
+                runner=runner,
+            )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.adapter, "mineru")
+            self.assertEqual([attempt.status for attempt in result.attempts], ["empty-output", "success"])
+            self.assertIn("v6.7.8", (root / "output" / "canonical.md").read_text(encoding="utf-8"))
+
     def test_docling_is_unavailable_without_local_artifacts_when_remote_is_disabled(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -19,6 +85,20 @@ class ConversionTests(unittest.TestCase):
                 root / "output",
                 {"docling": "docling.exe"},
                 requested_adapter="docling",
+            )
+            self.assertFalse(result.success)
+            self.assertEqual(result.status, "unavailable")
+
+    def test_mineru_is_unavailable_without_local_model_config_when_remote_is_disabled(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "scan.pdf"
+            source.write_bytes(b"%PDF-1.4\nimage-only")
+            result = convert_source(
+                source,
+                root / "output",
+                {"mineru": "mineru.exe"},
+                requested_adapter="mineru",
             )
             self.assertFalse(result.success)
             self.assertEqual(result.status, "unavailable")

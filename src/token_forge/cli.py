@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .adapters import probe_all
 from .benchmark import run_manifest
-from .config import load_config
+from .config import LocalConfig, load_config
 from .conversion import convert_source
 from .pipeline import build_text_pack
 from .router import profile_source
@@ -27,7 +27,7 @@ def _parser() -> argparse.ArgumentParser:
     convert.add_argument("--input", required=True, type=Path)
     convert.add_argument("--output", required=True, type=Path)
     convert.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
-    convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown", "docling"), default="auto")
+    convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown", "docling", "mineru"), default="auto")
     convert.add_argument("--timeout", type=int, default=120)
 
     pack = sub.add_parser("pack", help="Build a deterministic text context pack")
@@ -48,6 +48,29 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _conversion_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
+    docling_artifacts = config.adapters.get("docling_artifacts")
+    mineru_config = config.adapters.get("mineru_config")
+    docling_local = bool(docling_artifacts and Path(docling_artifacts).exists())
+    mineru_local = bool(mineru_config and Path(mineru_config).is_file())
+    return {
+        "docling": {
+            "eligible": docling_local or config.allow_remote,
+            "local_artifacts": docling_local,
+            "reason": "local artifacts configured" if docling_local else "local artifacts missing",
+        },
+        "mineru": {
+            "eligible": mineru_local or config.allow_remote,
+            "local_models": mineru_local,
+            "reason": "local model config ready" if mineru_local else "local model config missing",
+        },
+        "paddleocr_local_scan": {
+            "eligible": False,
+            "reason": "installed CLI exposes Office doc2md and cloud API, not local scanned-PDF OCR",
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "doctor":
@@ -57,6 +80,7 @@ def main(argv: list[str] | None = None) -> int:
             "gpu_serial": config.gpu_serial,
             "allow_remote": config.allow_remote,
             "adapters": [status.to_dict() for status in probe_all(configured=config.adapters)],
+            "conversion_gates": _conversion_gates(config),
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return 0
@@ -76,6 +100,8 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         if result.success:
             return 0
+        if result.status == "needs-ocr":
+            return 4
         return 3 if result.status == "unavailable" else 2
     if args.command == "pack":
         source = args.input.read_text(encoding="utf-8")

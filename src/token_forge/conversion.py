@@ -84,7 +84,11 @@ def _html_visible_text(source: str) -> str:
     return "\n".join(parser.parts)
 
 
-def _run_process(command: Sequence[str], timeout_seconds: int) -> ProcessOutcome:
+def _run_process(
+    command: Sequence[str],
+    timeout_seconds: int,
+    environment: Mapping[str, str] | None = None,
+) -> ProcessOutcome:
     selected: Sequence[str] | str = command
     if os.name == "nt" and Path(command[0]).suffix.lower() in {".cmd", ".bat"}:
         selected = ["cmd.exe", "/d", "/s", "/c", subprocess.list2cmdline(list(command))]
@@ -98,6 +102,7 @@ def _run_process(command: Sequence[str], timeout_seconds: int) -> ProcessOutcome
             timeout=timeout_seconds,
             check=False,
             shell=False,
+            env={**os.environ, **(environment or {})},
         )
     except subprocess.TimeoutExpired as error:
         return ProcessOutcome(124, error.stdout or "", error.stderr or "adapter timed out")
@@ -149,7 +154,51 @@ def _command(
             staging / f"{source.stem}.md",
             staging,
         )
+    if adapter == "mineru":
+        staging = Path(tempfile.mkdtemp(prefix=".mineru-", dir=destination.parent))
+        return (
+            [
+                executable,
+                "-p",
+                str(source),
+                "-o",
+                str(staging),
+                "-m",
+                "ocr",
+                "-b",
+                "pipeline",
+                "-f",
+                "false",
+                "-t",
+                "false",
+            ],
+            staging,
+            staging,
+        )
     raise ValueError(f"adapter is not implemented: {adapter}")
+
+
+def _resolved_output(adapter: str, produced_path: Path, source: Path) -> Path:
+    if adapter != "mineru" or not produced_path.is_dir():
+        return produced_path
+    markdowns = sorted(produced_path.rglob("*.md"))
+    matching = [path for path in markdowns if path.stem == source.stem]
+    if matching:
+        return matching[0]
+    if len(markdowns) == 1:
+        return markdowns[0]
+    return produced_path / f"{source.stem}.md"
+
+
+def _adapter_is_ready(adapter: str, adapters: Mapping[str, str], allow_remote: bool) -> bool:
+    if not adapters.get(adapter):
+        return False
+    if adapter == "docling":
+        return bool(adapters.get("docling_artifacts") or allow_remote)
+    if adapter == "mineru":
+        config = adapters.get("mineru_config")
+        return bool((config and Path(config).is_file()) or allow_remote)
+    return True
 
 
 def _ooxml_text(source: Path) -> str:
@@ -209,7 +258,13 @@ def convert_source(
         raise ValueError("timeout_seconds must be positive")
 
     started = time.perf_counter()
-    invoke = runner or _run_process
+    def invoke(
+        command: Sequence[str],
+        environment: Mapping[str, str] | None = None,
+    ) -> ProcessOutcome:
+        if runner is not None:
+            return runner(command, timeout_seconds)
+        return _run_process(command, timeout_seconds, environment)
     profile = profile_source(str(source))
     source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
     protected_source = _source_literals(source)
@@ -218,26 +273,23 @@ def convert_source(
     canonical = output_dir / "canonical.md"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    implemented = {"defuddle", "markitdown", "docling"}
+    implemented = {"defuddle", "markitdown", "docling", "mineru"}
     if requested_adapter == "auto":
         candidates = [
             name for name in profile.adapter_candidates
-            if name in implemented and adapters.get(name)
-            and (name != "docling" or adapters.get("docling_artifacts") or allow_remote)
+            if name in implemented and _adapter_is_ready(name, adapters, allow_remote)
         ]
     else:
         if requested_adapter not in implemented:
             raise ValueError(f"adapter is not implemented: {requested_adapter}")
-        candidates = [requested_adapter] if adapters.get(requested_adapter) else []
-        if requested_adapter == "docling" and not (adapters.get("docling_artifacts") or allow_remote):
-            candidates = []
+        candidates = [requested_adapter] if _adapter_is_ready(requested_adapter, adapters, allow_remote) else []
 
     attempts: list[ConversionAttempt] = []
     best_recall: float | None = None if protected_source is None else (1.0 if not protected else 0.0)
     final_status = "unavailable"
     for adapter in candidates:
         executable = adapters[adapter]
-        version_outcome = invoke(_version_command(adapter, executable), timeout_seconds)
+        version_outcome = invoke(_version_command(adapter, executable))
         version = (version_outcome.stdout or version_outcome.stderr).strip().splitlines()
         version_text = version[0][:200] if version else None
         canonical.unlink(missing_ok=True)
@@ -249,7 +301,12 @@ def convert_source(
             canonical,
             adapters.get("docling_artifacts"),
         )
-        outcome = invoke(command, timeout_seconds)
+        environment = None
+        if adapter == "mineru":
+            environment = {"MINERU_MODEL_SOURCE": "local"}
+            if adapters.get("mineru_config"):
+                environment["MINERU_TOOLS_CONFIG_JSON"] = adapters["mineru_config"]
+        outcome = invoke(command, environment)
         elapsed_ms = round((time.perf_counter() - attempt_started) * 1000)
 
         if outcome.returncode != 0:
@@ -263,8 +320,12 @@ def convert_source(
             if cleanup_root:
                 shutil.rmtree(cleanup_root, ignore_errors=True)
             continue
+        produced_path = _resolved_output(adapter, produced_path, source)
         if not produced_path.is_file() or not produced_path.read_text(encoding="utf-8", errors="replace").strip():
-            final_status = "quality-failed"
+            if requested_adapter == "auto" and source.suffix.lower() == ".pdf" and adapter == "markitdown":
+                final_status = "needs-ocr"
+            else:
+                final_status = "quality-failed"
             attempts.append(
                 ConversionAttempt(adapter, "empty-output", outcome.returncode, version_text, elapsed_ms)
             )

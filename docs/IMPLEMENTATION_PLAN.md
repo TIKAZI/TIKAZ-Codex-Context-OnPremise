@@ -17,7 +17,9 @@ Checkpoint: unit tests pass and no external dependency is required.
 - [x] Add MarkItDown PDF conversion and an explicit `output-only` verification state.
 - [x] Add Docling invocation with isolated output staging; keep it disabled by the quality gate until local model artifacts are available.
 - [x] Extract source literals from DOCX/PPTX XML before allowing conversion success.
-- [ ] Add subprocess adapters for MinerU, Playwright, PaddleOCR, yt-dlp, and PySceneDetect.
+- [x] Detect image-only PDF output and return an actionable `needs-ocr` state.
+- [x] Add an isolated MinerU `pipeline + ocr` adapter gated by local model configuration.
+- [ ] Add subprocess adapters for Playwright, local image OCR, yt-dlp, and PySceneDetect.
 
 Checkpoint: each adapter passes one fixed fixture before it is eligible for routing.
 

@@ -40,6 +40,10 @@ python -m token_forge convert `
 
 `convert` routes local HTML through Defuddle, and documents/PDF through MarkItDown with Docling available as an explicit fallback. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, verification level, and protected-literal recall. HTML and DOCX/PPTX can be source-literal checked; binary PDF conversion is currently reported as `output-only` unless an independent source extractor is configured. If a source-literal converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
 
+`doctor` reports command installation separately from `conversion_gates`, so an installed executable is not presented as model-ready.
+
+Image-only PDF is not treated as an empty success. If MarkItDown finds no text and no local OCR model is eligible, `convert` returns `needs-ocr` with exit code `4`, keeps the source, and does not write `canonical.md`. A configured local MinerU pipeline can then run `pipeline + ocr` in an isolated staging directory. Remote model acquisition remains opt-in.
+
 ## Development status
 
 The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first document adapter slice now performs local HTML and PDF conversion with explicit verification levels and safe fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.

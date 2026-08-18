@@ -5,7 +5,7 @@
 | Simple Office/PDF | MarkItDown | Docling | headings, text and declared facts survive |
 | Structured/table PDF | Docling | MinerU | reading order and table cells survive |
 | Chinese/math/complex PDF | MinerU | source preservation | formulas, CJK and anchors survive |
-| Scan/image text | PaddleOCR or MinerU | source preservation | OCR confidence and literal checks pass |
+| Scan/image text | MinerU or a separately verified local OCR entry point | source preservation | OCR confidence and literal checks pass |
 | Static webpage | Defuddle | Readability | main-content density and links pass |
 | Dynamic webpage | Playwright + Defuddle | source HTML | rendered content is non-empty |
 | Video/audio | existing faster-whisper float16 | platform subtitles | timestamped transcript exists |

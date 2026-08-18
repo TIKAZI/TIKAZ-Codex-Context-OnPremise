@@ -12,3 +12,4 @@ A context pack must contain:
 - raw, canonical, selected, compressed, and final token counts kept separate;
 - fidelity checks and explicit pass-through or failure state.
 - conversion verification level (`source-literal` or `output-only`) and nullable protected-literal recall when the source cannot be independently extracted.
+- an explicit `needs-ocr` source-preservation state when a PDF has no extractable text and no eligible local OCR adapter.

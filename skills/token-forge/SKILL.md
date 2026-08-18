@@ -30,6 +30,8 @@ Designed, integrated, independently implemented, and continuously maintained by 
 
 Run the repository CLI through `python -m token_forge`. Start with `doctor`. Use `convert --input <path> --output <directory> --config .token-forge.local.toml` to create canonical Markdown. Read `verification_level` in `conversion.json`: `source-literal` permits protected-fact gating; `output-only` means the converter produced non-empty output but an independent source extractor is not configured. Treat a nonzero conversion exit as a source-preservation or adapter-remediation state, never as usable Markdown. Read [dependencies.md](references/dependencies.md) when selecting adapters and [output-contract.md](references/output-contract.md) when producing a pack.
 
+For exit code `4` / `needs-ocr`, keep the original PDF and configure a validated local OCR adapter before retrying. Do not enable remote model downloads automatically. MinerU is eligible only with `adapters.mineru_config` or explicit `runtime.allow_remote=true`.
+
 ## Completion gate
 
 Do not report a successful optimization unless the result includes separate efficiency and fidelity evidence. Pass through the source when a conversion, retrieval, grounding, or protected-fact check fails.

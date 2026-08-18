@@ -13,6 +13,27 @@ from token_forge.conversion import ConversionResult
 
 
 class ConvertCliTests(unittest.TestCase):
+    def test_doctor_separates_installed_commands_from_conversion_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            mineru = root / "mineru.exe"
+            mineru.write_bytes(b"")
+            config = root / "local.toml"
+            config.write_text(
+                f"[adapters]\nmineru = '{mineru.as_posix()}'\n"
+                f"mineru_config = '{(root / 'missing-mineru.json').as_posix()}'\n"
+                "[runtime]\nallow_remote = false\n",
+                encoding="utf-8",
+            )
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                code = main(["doctor", "--config", str(config)])
+
+            payload = json.loads(stream.getvalue())
+            self.assertEqual(code, 0)
+            self.assertFalse(payload["conversion_gates"]["mineru"]["eligible"])
+            self.assertFalse(payload["conversion_gates"]["paddleocr_local_scan"]["eligible"])
+
     def test_convert_passes_local_config_and_prints_result(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -77,7 +98,7 @@ class ConvertCliTests(unittest.TestCase):
             root = Path(temp)
             source = root / "article.html"
             source.write_text("<p>text</p>", encoding="utf-8")
-            for status, expected in (("unavailable", 3), ("quality-failed", 2)):
+            for status, expected in (("unavailable", 3), ("quality-failed", 2), ("needs-ocr", 4)):
                 result = ConversionResult(status=status, **base)
                 with patch("token_forge.cli.convert_source", return_value=result):
                     with contextlib.redirect_stdout(io.StringIO()):
