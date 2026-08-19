@@ -20,6 +20,9 @@ def main() -> int:
         model_config={"local_files_only": True, "trust_remote_code": False},
         use_llmlingua2=True,
     )
+    # LLMLingua 0.2.2 dispatches token boundaries from the model name string.
+    # A local path is valid for loading but misses its XLM-RoBERTa branch.
+    compressor.model_name = "xlm-roberta-large"
     result = compressor.compress_prompt(
         [str(value) for value in payload["context"]],
         question=str(payload.get("question", "")),
