@@ -49,6 +49,7 @@ def probe_adapter(spec: AdapterSpec) -> AdapterStatus:
 def default_adapter_specs(configured: Mapping[str, str] | None = None) -> tuple[AdapterSpec, ...]:
     configured = configured or {}
     return (
+        AdapterSpec("node", tuple(filter(None, (configured.get("node"), os.getenv("TOKEN_FORGE_NODE"), "node")))),
         AdapterSpec("ffmpeg", tuple(filter(None, (configured.get("ffmpeg"), os.getenv("TOKEN_FORGE_FFMPEG"), "ffmpeg", "ffmpeg.cmd")))),
         AdapterSpec("markitdown", tuple(filter(None, (configured.get("markitdown"), "markitdown")))),
         AdapterSpec("docling", tuple(filter(None, (configured.get("docling"), "docling")))),

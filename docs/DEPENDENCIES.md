@@ -20,3 +20,5 @@
 See `FORMAT_MATRIX.md` for extensions and explicit non-universal cases, and `INSTALL_LAYOUT.md` for isolated runtime and cache paths.
 
 Dependencies are installed into isolated G-drive environments after their profile passes the fixed benchmark. The repository stores adapters and version manifests, not environments or model weights.
+
+Local smoke evidence currently covers MinerU image/PDF OCR, Playwright Chromium 1234 + Defuddle, and FFmpeg + faster-whisper + PySceneDetect. The configured model directories for BGE-M3, reranking, and LLMLingua are intentionally ineligible until weights and quality fixtures are available.

@@ -8,8 +8,11 @@ from .adapters import probe_all
 from .benchmark import run_manifest
 from .config import LocalConfig, load_config
 from .conversion import convert_source
+from .media import process_local_media
+from .platform_media import inspect_platform_media
 from .pipeline import build_text_pack
 from .router import profile_source
+from .web import prepare_web_url
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -29,6 +32,26 @@ def _parser() -> argparse.ArgumentParser:
     convert.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
     convert.add_argument("--adapter", choices=("auto", "defuddle", "markitdown", "docling", "mineru"), default="auto")
     convert.add_argument("--timeout", type=int, default=120)
+
+    web = sub.add_parser("web", help="Render a dynamic HTTP(S) page and convert the captured HTML")
+    web.add_argument("--url", required=True)
+    web.add_argument("--output", required=True, type=Path)
+    web.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    web.add_argument("--timeout", type=int, default=120)
+
+    media = sub.add_parser("media", help="Transcribe local audio/video and extract video scene evidence")
+    media.add_argument("--input", required=True, type=Path)
+    media.add_argument("--output", required=True, type=Path)
+    media.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    media.add_argument("--language", default="zh")
+    media.add_argument("--timeout", type=int, default=600)
+
+    platform = sub.add_parser("platform-media", help="Inspect platform metadata/subtitles without downloading media")
+    platform.add_argument("--url", required=True)
+    platform.add_argument("--output", required=True, type=Path)
+    platform.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    platform.add_argument("--no-subtitles", action="store_true")
+    platform.add_argument("--timeout", type=int, default=120)
 
     pack = sub.add_parser("pack", help="Build a deterministic text context pack")
     pack.add_argument("--input", required=True, type=Path)
@@ -87,6 +110,38 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "profile":
         print(json.dumps(profile_source(args.input).__dict__, ensure_ascii=False, indent=2))
         return 0
+    if args.command == "web":
+        config = load_config(args.config)
+        result = prepare_web_url(
+            args.url,
+            args.output,
+            config.adapters,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0 if result.success else 3
+    if args.command == "media":
+        config = load_config(args.config)
+        result = process_local_media(
+            args.input,
+            args.output,
+            config.adapters,
+            language=args.language,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0 if result.success else 3
+    if args.command == "platform-media":
+        config = load_config(args.config)
+        result = inspect_platform_media(
+            args.url,
+            args.output,
+            config.adapters,
+            subtitles=not args.no_subtitles,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0 if result.success else 3
     if args.command == "convert":
         config = load_config(args.config)
         result = convert_source(

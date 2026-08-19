@@ -9,10 +9,10 @@
 | MinerU | 3.4.5 | local `pipeline + ocr` route passed one fixed clear scan | degraded, rotated, table, figure, and real-document gates pending |
 | PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | CLI exposes Office `doc2md` and cloud API | installed CLI is not a local scanned-PDF OCR route |
 | Defuddle | 0.19.2 | primary CLI adapter passed on fixed local HTML | dynamic-page gate pending |
-| Playwright | 1.62.1 + Chromium 151 | real headless launch passed | dynamic-page fixture pending |
+| Playwright | 1.62.1 + Chromium 1234 local assets | dynamic-page render + Defuddle smoke passed | authenticated/private pages and broader dynamic fixtures pending |
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
-| PySceneDetect | 0.7.1 | version passed | real video fixture pending |
-| faster-whisper | existing large-v3 | doctor passed | existing local workflow remains baseline |
+| PySceneDetect | 0.7.1 | real local video produced 7 scenes and 21 keyframes | broader codec/transition fixtures pending |
+| faster-whisper | existing large-v3 | real local video produced 13 timestamped segments; CUDA -> CPU int8 fallback tested | CUDA runtime repair and WER fixture pending |
 | FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | import passed | embedding weights pending |
 | LLMLingua | 0.2.2 | import passed | model and low-risk quality gate pending |
 
@@ -33,6 +33,10 @@ The fixed image-only PDF was rendered and visually inspected, and pypdf confirme
 After local MinerU pipeline models were configured, the bilingual image-only fixture completed through the full automatic route: MarkItDown `empty-output` -> MinerU `pipeline + ocr` -> `canonical.md`. MinerU took 27.877 seconds and the complete command took 33.693 seconds with exit code `0`. The 100-character normalized reference produced edit distance `0` (CER `0.00%`) and exact recall `5/5` for the declared version, date, command, order ID, and amount. The ledger remains correctly marked `verification_level: output-only` and `protected_recall: null` because the controller does not treat OCR output as an independent source oracle. The checked fixture and machine-readable result are committed under `benchmarks/`; this does not establish performance on degraded or real-world scans.
 
 The first real run exposed a Windows process-lifecycle defect: MinerU wrote its Markdown but inherited output pipes prevented the command from completing. The runner now captures output through temporary files and places Windows adapters in a kill-on-close Job Object before resuming them. Regression tests cover both timeout cleanup and the case where a short-lived parent exits before a pipe-inheriting child.
+
+The dynamic-page smoke now uses the cached local Chromium 1234 assets under `G:\CodexTools\models\token-forge\playwright`; the first attempt correctly failed when that browser path was not exported, then passed after the local path was configured. The media smoke used `F:\CodexVideoSummary\data\media\BV1TU3g66Exd.mp4` as a read-only source and wrote its transcript, scene CSV, and keyframes under `F:\TIKAZ-Token-Forge-Data\outputs\media-smoke-cpu2`.
+
+The configured BGE-M3, reranker, and LLMLingua model directories remain unavailable because their weights have not passed a fixed local quality gate. No remote model download is enabled, and BM25/deterministic extraction remain the only publishable retrieval/compression paths.
 
 ## Storage policy
 

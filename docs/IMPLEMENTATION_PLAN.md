@@ -21,13 +21,17 @@ Checkpoint: unit tests pass and no external dependency is required.
 - [x] Add an isolated MinerU `pipeline + ocr` adapter gated by local model configuration.
 - [x] Validate one fixed bilingual image-only PDF with measured CER, exact fact recall, latency, and process cleanup.
 - [x] Isolate subprocess trees and prevent inherited output pipes from defeating adapter timeouts on Windows.
-- [ ] Add subprocess adapters for Playwright, local image OCR, yt-dlp, and PySceneDetect.
+- [x] Add a Playwright renderer that preserves rendered HTML, screenshot, metadata, and Defuddle output.
+- [x] Route local images through MinerU and validate one real image fixture.
+- [x] Add local FFmpeg + faster-whisper + PySceneDetect media processing with CUDA/CPU fallback and recovery ledger.
+- [x] Add explicit yt-dlp metadata/subtitle adapter with download disabled by contract.
 
 Checkpoint: each adapter passes one fixed fixture before it is eligible for routing.
 
 ## Phase 3: retrieval and learned compression
 
-- [ ] Add lexical and dense indexes with deterministic chunk identifiers.
+- [x] Keep deterministic lexical retrieval and bounded selection as the no-model baseline.
+- [ ] Add dense indexes with deterministic chunk identifiers.
 - [ ] Evaluate BGE-M3 and candidate rerankers on personal fixtures.
 - [ ] Add LLMLingua-2 behind an eligibility and quality gate.
 

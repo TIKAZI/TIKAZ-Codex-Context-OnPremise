@@ -21,6 +21,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_all_optional_adapters_accept_explicit_isolated_paths(self):
         configured = {
+            "node": "G:/node/node.exe",
             "markitdown": "G:/envs/documents/markitdown.exe",
             "docling": "G:/envs/documents/docling.exe",
             "mineru": "G:/envs/mineru/mineru.exe",

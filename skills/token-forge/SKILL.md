@@ -32,6 +32,10 @@ Run the repository CLI through `python -m token_forge`. Start with `doctor`. Use
 
 For exit code `4` / `needs-ocr`, keep the original PDF and configure a validated local OCR adapter before retrying. Do not enable remote model downloads automatically. MinerU is eligible only with `adapters.mineru_config` or explicit `runtime.allow_remote=true`.
 
+For dynamic HTTP(S) pages, use the repository `web` command so rendered HTML, a viewport image, and browser metadata remain alongside the Defuddle artifact. For local audio/video, use the `media` command; it preserves timestamped Whisper output and scene/keyframe evidence. A CUDA failure may fall back to CPU int8, but the ledger must retain that runtime fact.
+
+For platform URLs, use `platform-media`; it records metadata and optional subtitles without downloading the media. Do not turn this into an implicit media downloader or bypass platform authorization.
+
 Treat OCR metrics as fixture-specific. The repository's clear bilingual scan is a smoke gate, not permission to claim universal CER, accuracy, latency, or token savings. Keep scanned-PDF results at `output-only` unless a separate source-derived verification path exists.
 
 ## Completion gate

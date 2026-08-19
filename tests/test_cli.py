@@ -10,9 +10,37 @@ from unittest.mock import patch
 
 from token_forge.cli import main
 from token_forge.conversion import ConversionResult
+from token_forge.web import WebResult
 
 
 class ConvertCliTests(unittest.TestCase):
+    def test_web_command_prints_render_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            result = WebResult(
+                success=True,
+                status="success",
+                url="https://example.test",
+                final_url="https://example.test/",
+                source_hash="abc",
+                rendered_html=str(root / "rendered.html"),
+                viewport_image=str(root / "viewport.png"),
+                elapsed_ms=5,
+                conversion={"adapter": "defuddle"},
+            )
+            stream = io.StringIO()
+            config = root / "local.toml"
+            config.write_text("[adapters]\nnode = 'node'\nplaywright = 'playwright'\n", encoding="utf-8")
+            with patch("token_forge.cli.prepare_web_url", return_value=result) as prepare:
+                with contextlib.redirect_stdout(stream):
+                    code = main([
+                        "web", "--url", "https://example.test",
+                        "--output", str(root / "output"), "--config", str(config),
+                    ])
+            self.assertEqual(code, 0)
+            self.assertEqual(json.loads(stream.getvalue())["status"], "success")
+            prepare.assert_called_once()
+
     def test_doctor_separates_installed_commands_from_conversion_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
