@@ -5,10 +5,11 @@ import json
 from pathlib import Path
 
 from .adapters import probe_all
-from .benchmark import run_manifest
+from .benchmark import run_manifest, run_model_manifest
 from .config import LocalConfig, load_config
 from .conversion import convert_source
 from .media import process_local_media
+from .model_pipeline import optimize_text_pack
 from .platform_media import inspect_platform_media
 from .pipeline import build_text_pack
 from .router import profile_source
@@ -65,9 +66,28 @@ def _parser() -> argparse.ArgumentParser:
         default="auto",
     )
 
+    optimize = sub.add_parser(
+        "optimize", help="Use local retrieval/reranking and guarded prose compression"
+    )
+    optimize.add_argument("--input", required=True, type=Path)
+    optimize.add_argument("--query", required=True)
+    optimize.add_argument("--budget", required=True, type=int)
+    optimize.add_argument("--output", required=True, type=Path)
+    optimize.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    optimize.add_argument(
+        "--safety-class",
+        choices=("auto", "text", "code", "contract", "table", "financial", "command", "security"),
+        default="auto",
+    )
+    optimize.add_argument("--timeout", type=int, default=900)
+
     benchmark = sub.add_parser("benchmark", help="Run the fixed context benchmark")
     benchmark.add_argument("--manifest", required=True, type=Path)
     benchmark.add_argument("--output", required=True, type=Path)
+    model_benchmark = sub.add_parser("benchmark-models", help="Run fixed cases through local models")
+    model_benchmark.add_argument("--manifest", required=True, type=Path)
+    model_benchmark.add_argument("--output", required=True, type=Path)
+    model_benchmark.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
     return parser
 
 
@@ -94,6 +114,42 @@ def _conversion_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
     }
 
 
+def _model_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
+    statuses = {status.name: status for status in probe_all(configured=config.adapters)}
+
+    validation: dict[str, object] = {}
+    report_path = config.adapters.get("model_validation")
+    if report_path and Path(report_path).is_file():
+        try:
+            report = json.loads(Path(report_path).read_text(encoding="utf-8"))
+            if isinstance(report.get("validation"), dict):
+                validation = report["validation"]
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            validation = {}
+
+    def gate(stage: str, names: tuple[str, ...]) -> dict[str, object]:
+        missing = [name for name in names if not statuses[name].available]
+        validated = not missing and validation.get(stage) is True
+        return {
+            "eligible": not missing,
+            "validated": validated,
+            "required": list(names),
+            "missing": missing,
+            "reason": (
+                "offline fixture validation passed"
+                if validated
+                else "required local runtime and model weights detected; run offline validation"
+                if not missing
+                else f"missing or incomplete: {', '.join(missing)}"
+            ),
+        }
+
+    return {
+        "retrieval": gate("retrieval", ("retrieval-python", "embedding-model", "reranker-model")),
+        "learned_compression": gate("learned_compression", ("llmlingua-python", "llmlingua-model")),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "doctor":
@@ -104,6 +160,7 @@ def main(argv: list[str] | None = None) -> int:
             "allow_remote": config.allow_remote,
             "adapters": [status.to_dict() for status in probe_all(configured=config.adapters)],
             "conversion_gates": _conversion_gates(config),
+            "model_gates": _model_gates(config),
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return 0
@@ -171,7 +228,27 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         return 0 if not result.budget_conflict else 2
+    if args.command == "optimize":
+        config = load_config(args.config)
+        source = args.input.read_text(encoding="utf-8")
+        safety_class = profile_source(str(args.input)).family if args.safety_class == "auto" else args.safety_class
+        result = optimize_text_pack(
+            source,
+            args.query,
+            args.budget,
+            config.adapters,
+            safety_class=safety_class,
+            output_dir=args.output,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0 if result.protected_recall == 1.0 and not result.budget_conflict else 2
     if args.command == "benchmark":
         print(json.dumps(run_manifest(args.manifest, args.output), ensure_ascii=False, indent=2))
         return 0
+    if args.command == "benchmark-models":
+        config = load_config(args.config)
+        result = run_model_manifest(args.manifest, args.output, config.adapters)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result["all_protected_pass"] else 2
     return 1

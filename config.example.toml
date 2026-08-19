@@ -17,6 +17,7 @@ llmlingua_python = 'G:\\CodexTools\\token-forge\\envs\\llmlingua\\Scripts\\pytho
 embedding_model = 'G:\\CodexTools\\models\\token-forge\\bge-m3'
 reranker_model = 'G:\\CodexTools\\models\\token-forge\\bge-reranker-v2-m3'
 llmlingua_model = 'G:\\CodexTools\\models\\token-forge\\llmlingua-2'
+model_validation = 'F:\\TIKAZ-Token-Forge-Data\\outputs\\model-benchmark\\model-results.json'
 cache_root = 'F:\\TIKAZ-Token-Forge-Data\\cache'
 output_root = 'F:\\TIKAZ-Token-Forge-Data\\outputs'
 

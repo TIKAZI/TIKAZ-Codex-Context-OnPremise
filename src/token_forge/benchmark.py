@@ -6,6 +6,7 @@ from typing import Any
 
 from .cost import estimate_tokens
 from .pipeline import build_text_pack, canonicalize_text
+from .model_pipeline import optimize_text_pack
 
 
 def run_case(case: dict[str, Any]) -> dict[str, Any]:
@@ -85,6 +86,56 @@ def run_manifest(manifest_path: Path, output_dir: Path) -> dict[str, Any]:
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "results.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    return summary
+
+
+def run_model_manifest(
+    manifest_path: Path,
+    output_dir: Path,
+    adapters: dict[str, str],
+) -> dict[str, Any]:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    cases: list[dict[str, Any]] = []
+    for raw in manifest.get("cases", []):
+        case = dict(raw)
+        source_path = manifest_path.parent / str(case["source_file"])
+        source = source_path.read_text(encoding="utf-8")
+        result = optimize_text_pack(
+            source,
+            str(case["query"]),
+            int(case["budget_tokens"]),
+            adapters,
+            safety_class=str(case.get("safety_class", "text")),
+        )
+        declared = tuple(str(value) for value in case.get("protected", ()))
+        declared_recall = 1.0 if not declared else sum(value in result.text for value in declared) / len(declared)
+        cases.append({
+            "id": str(case["id"]),
+            "mode": result.mode,
+            "input_tokens_estimated": result.input_tokens,
+            "final_tokens_estimated": result.final_tokens,
+            "reduction_ratio": result.reduction_ratio,
+            "protected_recall": declared_recall,
+            "fallback_reason": result.fallback_reason,
+        })
+    summary = {
+        "schema_version": 1,
+        "measurement": "deterministic token estimate; not provider telemetry",
+        "case_count": len(cases),
+        "all_protected_pass": all(case["protected_recall"] == 1.0 for case in cases),
+        "model_routes_completed": sum(case["mode"] in {"model-retrieved", "learned-compressed"} for case in cases),
+        "validation": {
+            "retrieval": any(case["mode"] in {"model-retrieved", "learned-compressed"} for case in cases)
+            and all(case["protected_recall"] == 1.0 for case in cases),
+            "learned_compression": any(case["mode"] == "learned-compressed" for case in cases)
+            and all(case["protected_recall"] == 1.0 for case in cases),
+        },
+        "cases": cases,
+    }
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "model-results.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
     )
     return summary

@@ -61,6 +61,63 @@ class ConvertCliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertFalse(payload["conversion_gates"]["mineru"]["eligible"])
             self.assertFalse(payload["conversion_gates"]["paddleocr_local_scan"]["eligible"])
+            self.assertFalse(payload["model_gates"]["retrieval"]["eligible"])
+            self.assertFalse(payload["model_gates"]["learned_compression"]["eligible"])
+
+    def test_optimize_uses_explicit_local_models(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "notes.md"
+            source.write_text("Release v3.2.1 notes.", encoding="utf-8")
+            config = root / "local.toml"
+            config.write_text(
+                "[adapters]\nretrieval_python = 'G:/python.exe'\n"
+                "embedding_model = 'G:/bge-m3'\nreranker_model = 'G:/reranker'\n",
+                encoding="utf-8",
+            )
+            expected = type("Result", (), {
+                "protected_recall": 1.0,
+                "budget_conflict": False,
+                "to_dict": lambda self: {"mode": "model-retrieved"},
+            })()
+            with patch("token_forge.cli.optimize_text_pack", return_value=expected) as optimize:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    code = main([
+                        "optimize", "--input", str(source), "--query", "release",
+                        "--budget", "50", "--output", str(root / "out"),
+                        "--config", str(config),
+                    ])
+            self.assertEqual(code, 0)
+            self.assertEqual(optimize.call_args.args[3]["embedding_model"], "G:/bge-m3")
+
+    def test_doctor_reads_stage_validation_from_a_local_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            models = {}
+            for name in ("embedding_model", "reranker_model", "llmlingua_model"):
+                model = root / name
+                model.mkdir()
+                (model / "config.json").write_text("{}", encoding="utf-8")
+                with (model / "model.safetensors").open("wb") as stream:
+                    stream.truncate(1_000_001)
+                models[name] = model
+            report = root / "validation.json"
+            report.write_text(
+                '{"validation":{"retrieval":true,"learned_compression":true}}', encoding="utf-8"
+            )
+            config = root / "local.toml"
+            config.write_text(
+                "[adapters]\nretrieval_python = 'python'\nllmlingua_python = 'python'\n"
+                + "\n".join(f"{name} = '{path.as_posix()}'" for name, path in models.items())
+                + f"\nmodel_validation = '{report.as_posix()}'\n",
+                encoding="utf-8",
+            )
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                main(["doctor", "--config", str(config)])
+            gates = json.loads(stream.getvalue())["model_gates"]
+            self.assertTrue(gates["retrieval"]["validated"])
+            self.assertTrue(gates["learned_compression"]["validated"])
 
     def test_convert_passes_local_config_and_prints_result(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

@@ -12,13 +12,13 @@
 | Playwright | 1.62.1 + Chromium 1234 local assets | dynamic-page render + Defuddle smoke passed | authenticated/private pages and broader dynamic fixtures pending |
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
 | PySceneDetect | 0.7.1 | real local video produced 7 scenes and 21 keyframes | broader codec/transition fixtures pending |
-| faster-whisper | existing large-v3 | real local video produced 13 timestamped segments; CUDA -> CPU int8 fallback tested | CUDA runtime repair and WER fixture pending |
+| faster-whisper | existing large-v3 | local CUDA DLL discovery repaired; full 14.23-second media route passed in 5.486 seconds | broader WER/language fixtures pending |
 | FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | import passed | embedding weights pending |
 | LLMLingua | 0.2.2 | import passed | model and low-risk quality gate pending |
 
 ## Model download boundary
 
-The BGE-M3 download was attempted twice on G: and stopped after a stale-lock/no-progress condition. The partial directories are not considered usable and doctor reports the embedding model as unavailable. BM25 remains the measured retrieval fallback. No percentage or retrieval quality claim is made from the partial model.
+The three approved local models are downloading to G: with resumable Hugging Face transfers. Partial directories are not considered usable and doctor reports them as unavailable until the config and substantial weight files are complete, followed by an explicit offline load and fixed quality gate. BM25/deterministic selection remains the measured fallback. No percentage or retrieval quality claim is made from partial models.
 
 ## Verified conversion slice
 
@@ -36,7 +36,9 @@ The first real run exposed a Windows process-lifecycle defect: MinerU wrote its 
 
 The dynamic-page smoke now uses the cached local Chromium 1234 assets under `G:\CodexTools\models\token-forge\playwright`; the first attempt correctly failed when that browser path was not exported, then passed after the local path was configured. The media smoke used `F:\CodexVideoSummary\data\media\BV1TU3g66Exd.mp4` as a read-only source and wrote its transcript, scene CSV, and keyframes under `F:\TIKAZ-Token-Forge-Data\outputs\media-smoke-cpu2`.
 
-The configured BGE-M3, reranker, and LLMLingua model directories remain unavailable because their weights have not passed a fixed local quality gate. No remote model download is enabled, and BM25/deterministic extraction remain the only publishable retrieval/compression paths.
+The configured BGE-M3, reranker, and LLMLingua model directories remain unavailable while their approved one-time downloads and fixed local quality gates are incomplete. Runtime optimization itself forces offline mode and cannot fetch a model. BM25/deterministic extraction remains the only publishable retrieval/compression path until those gates pass.
+
+The same local media fixture was rerun after adding Windows DLL discovery for the existing NVIDIA cublas and cuDNN packages in the Whisper environment. The complete media command finished in 5.486 seconds and wrote `transcription-runtime.json` with `device: cuda`, `compute_type: float16`, and `fallback: false`, alongside 10 timestamped transcript segments and 21 keyframes. This supersedes the earlier CPU-fallback diagnosis for the checked host and fixture; it is not a general speed or WER claim.
 
 ## Storage policy
 

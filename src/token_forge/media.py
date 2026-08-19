@@ -19,6 +19,7 @@ class MediaResult:
     scenes_path: str | None
     keyframes_dir: str | None
     elapsed_ms: int
+    transcription_runtime_path: str | None = None
     error: str = ""
 
     def to_dict(self) -> dict[str, object]:
@@ -43,7 +44,7 @@ def process_local_media(
     scenedetect = adapters.get("scenedetect") or shutil.which("scenedetect")
     def failure(status: str, error: str) -> MediaResult:
         result = MediaResult(False, status, str(source.resolve()), None, None, None,
-                             round((time.perf_counter() - started) * 1000), error)
+                             round((time.perf_counter() - started) * 1000), None, error)
         (output_dir / "media.json").write_text(
             json.dumps(result.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
         )
@@ -61,10 +62,12 @@ def process_local_media(
         return failure("audio-failed", (outcome.stderr or outcome.stdout).strip()[:2000])
 
     transcript = output_dir / "transcript.md"
+    transcription_runtime = output_dir / "transcription-runtime.json"
     helper = Path(__file__).resolve().parents[2] / "scripts" / "transcribe_local.py"
     outcome = _run_process(
         [whisper_python, str(helper), "--audio", str(audio), "--model", whisper_model,
-         "--language", language, "--output", str(transcript)],
+         "--language", language, "--output", str(transcript),
+         "--metadata", str(transcription_runtime)],
         timeout_seconds,
     )
     if outcome.returncode != 0 or not transcript.is_file() or not transcript.read_text(encoding="utf-8").strip():
@@ -90,6 +93,7 @@ def process_local_media(
     result = MediaResult(True, "success", str(source.resolve()), str(transcript.resolve()),
                          str(scenes_path.resolve()) if scenes_path else None,
                          str(frames_dir.resolve()) if frames_dir else None,
-                         round((time.perf_counter() - started) * 1000))
+                         round((time.perf_counter() - started) * 1000),
+                         str(transcription_runtime.resolve()) if transcription_runtime.is_file() else None)
     (output_dir / "media.json").write_text(json.dumps(result.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     return result

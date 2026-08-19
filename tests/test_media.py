@@ -30,6 +30,9 @@ class MediaTests(unittest.TestCase):
                     Path(command[-1]).write_bytes(b"wav")
                 elif "transcribe_local.py" in str(command[1]):
                     Path(command[command.index("--output") + 1]).write_text("[0.00-1.00] hello\n", encoding="utf-8")
+                    Path(command[command.index("--metadata") + 1]).write_text(
+                        '{"device":"cuda","compute_type":"float16","fallback":false}', encoding="utf-8"
+                    )
                 elif command[0] == "scenedetect":
                     frame_dir = Path(command[command.index("-o") + 1])
                     (frame_dir / "scene_list.csv").write_text("Scene Number,Start Time\n1,0\n", encoding="utf-8")
@@ -43,4 +46,5 @@ class MediaTests(unittest.TestCase):
             self.assertTrue(result.success)
             self.assertTrue(Path(result.transcript_path).is_file())
             self.assertTrue(Path(result.scenes_path).is_file())
+            self.assertTrue(Path(result.transcription_runtime_path).is_file())
             self.assertEqual(len(calls), 3)

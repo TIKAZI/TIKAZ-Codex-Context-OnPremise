@@ -36,6 +36,8 @@ For dynamic HTTP(S) pages, use the repository `web` command so rendered HTML, a 
 
 For platform URLs, use `platform-media`; it records metadata and optional subtitles without downloading the media. Do not turn this into an implicit media downloader or bypass platform authorization.
 
+For bounded text context, use `optimize` only after `doctor.model_gates` reports the required local files as eligible and the repository's offline validation has passed. Read `model-ledger.json`; a `deterministic-fallback` mode is a valid source-preserving result, not proof that BGE or LLMLingua ran. Never override high-risk pass-through or the protected-literal and token-budget rejection gates.
+
 Treat OCR metrics as fixture-specific. The repository's clear bilingual scan is a smoke gate, not permission to claim universal CER, accuracy, latency, or token savings. Keep scanned-PDF results at `output-only` unless a separate source-derived verification path exists.
 
 ## Completion gate

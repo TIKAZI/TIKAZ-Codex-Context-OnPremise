@@ -36,11 +36,19 @@ python -m token_forge convert `
   --input path\to\source.pdf `
   --output path\to\result `
   --config .token-forge.local.toml
+python -m token_forge optimize `
+  --input path\to\canonical.md `
+  --query "the task to answer" `
+  --budget 2000 `
+  --output path\to\context-pack `
+  --config .token-forge.local.toml
 ```
 
 `convert` routes local HTML through Defuddle, and documents/PDF through MarkItDown with Docling available as an explicit fallback. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, verification level, and protected-literal recall. HTML and DOCX/PPTX can be source-literal checked; binary PDF conversion is currently reported as `output-only` unless an independent source extractor is configured. If a source-literal converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
 
-`doctor` reports command installation separately from `conversion_gates`, so an installed executable is not presented as model-ready.
+`doctor` reports command installation separately from `conversion_gates` and `model_gates`, so an installed executable or partial model directory is not presented as ready. `model_gates.*.eligible` means the configured runtime, model config, and substantial weight file are present; it remains `validated: false` until an explicit offline load test is recorded.
+
+`optimize` assigns stable content-derived chunk IDs, runs BGE-M3 dense retrieval and BGE reranking in an isolated local process, and only then considers LLMLingua-2 when selected low-risk prose still exceeds the budget. Learned output is rejected if it is empty, exceeds the budget, or drops a protected number, date, version, URL, command, or citation literal. Code, commands, contracts, tables, financial material, and security evidence bypass learned models. Any model failure falls back visibly to the deterministic selector and records the reason in `model-ledger.json`. Helpers force Hugging Face and Transformers offline mode; they never acquire models during an `optimize` run.
 
 Dynamic pages can be rendered locally with `python -m token_forge web --url <https-url> --output <dir>`. The command stores the rendered HTML, a viewport screenshot, browser metadata, and the Defuddle conversion ledger. It requires configured Playwright browser assets; no remote page content is sent to a service by Token Forge itself.
 
