@@ -32,6 +32,8 @@ Run the repository CLI through `python -m token_forge`. Start with `doctor`. Use
 
 For exit code `4` / `needs-ocr`, keep the original PDF and configure a validated local OCR adapter before retrying. Do not enable remote model downloads automatically. MinerU is eligible only with `adapters.mineru_config` or explicit `runtime.allow_remote=true`.
 
+Treat OCR metrics as fixture-specific. The repository's clear bilingual scan is a smoke gate, not permission to claim universal CER, accuracy, latency, or token savings. Keep scanned-PDF results at `output-only` unless a separate source-derived verification path exists.
+
 ## Completion gate
 
 Do not report a successful optimization unless the result includes separate efficiency and fidelity evidence. Pass through the source when a conversion, retrieval, grounding, or protected-fact check fails.

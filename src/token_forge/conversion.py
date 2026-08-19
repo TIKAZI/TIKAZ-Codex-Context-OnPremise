@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import signal
 import shutil
 import subprocess
 import tempfile
@@ -57,6 +58,10 @@ class ConversionResult:
 
 Runner = Callable[[Sequence[str], int], ProcessOutcome]
 
+_CREATE_SUSPENDED = 0x00000004
+_JOB_OBJECT_EXTENDED_LIMIT_INFORMATION = 9
+_JOB_OBJECT_LIMIT_KILL_ON_CLOSE = 0x00002000
+
 
 class _VisibleTextParser(HTMLParser):
     def __init__(self) -> None:
@@ -84,6 +89,128 @@ def _html_visible_text(source: str) -> str:
     return "\n".join(parser.parts)
 
 
+def _windows_kill_on_close_job(process: subprocess.Popen[str]) -> int | None:
+    if os.name != "nt":
+        return None
+    import ctypes
+    from ctypes import wintypes
+
+    class IoCounters(ctypes.Structure):
+        _fields_ = [
+            ("ReadOperationCount", ctypes.c_ulonglong),
+            ("WriteOperationCount", ctypes.c_ulonglong),
+            ("OtherOperationCount", ctypes.c_ulonglong),
+            ("ReadTransferCount", ctypes.c_ulonglong),
+            ("WriteTransferCount", ctypes.c_ulonglong),
+            ("OtherTransferCount", ctypes.c_ulonglong),
+        ]
+
+    class BasicLimitInformation(ctypes.Structure):
+        _fields_ = [
+            ("PerProcessUserTimeLimit", ctypes.c_longlong),
+            ("PerJobUserTimeLimit", ctypes.c_longlong),
+            ("LimitFlags", wintypes.DWORD),
+            ("MinimumWorkingSetSize", ctypes.c_size_t),
+            ("MaximumWorkingSetSize", ctypes.c_size_t),
+            ("ActiveProcessLimit", wintypes.DWORD),
+            ("Affinity", ctypes.c_size_t),
+            ("PriorityClass", wintypes.DWORD),
+            ("SchedulingClass", wintypes.DWORD),
+        ]
+
+    class ExtendedLimitInformation(ctypes.Structure):
+        _fields_ = [
+            ("BasicLimitInformation", BasicLimitInformation),
+            ("IoInfo", IoCounters),
+            ("ProcessMemoryLimit", ctypes.c_size_t),
+            ("JobMemoryLimit", ctypes.c_size_t),
+            ("PeakProcessMemoryUsed", ctypes.c_size_t),
+            ("PeakJobMemoryUsed", ctypes.c_size_t),
+        ]
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateJobObjectW.argtypes = (ctypes.c_void_p, wintypes.LPCWSTR)
+    kernel32.CreateJobObjectW.restype = wintypes.HANDLE
+    kernel32.SetInformationJobObject.argtypes = (
+        wintypes.HANDLE,
+        ctypes.c_int,
+        ctypes.c_void_p,
+        wintypes.DWORD,
+    )
+    kernel32.SetInformationJobObject.restype = wintypes.BOOL
+    kernel32.AssignProcessToJobObject.argtypes = (wintypes.HANDLE, wintypes.HANDLE)
+    kernel32.AssignProcessToJobObject.restype = wintypes.BOOL
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.restype = wintypes.BOOL
+
+    job = kernel32.CreateJobObjectW(None, None)
+    if not job:
+        return None
+    information = ExtendedLimitInformation()
+    information.BasicLimitInformation.LimitFlags = _JOB_OBJECT_LIMIT_KILL_ON_CLOSE
+    configured = kernel32.SetInformationJobObject(
+        job,
+        _JOB_OBJECT_EXTENDED_LIMIT_INFORMATION,
+        ctypes.byref(information),
+        ctypes.sizeof(information),
+    )
+    assigned = configured and kernel32.AssignProcessToJobObject(job, process._handle)
+    if not assigned:
+        kernel32.CloseHandle(job)
+        return None
+    return int(job)
+
+
+def _close_windows_job(job: int | None) -> None:
+    if job is None:
+        return
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    kernel32.CloseHandle(wintypes.HANDLE(job))
+
+
+def _resume_windows_process(process: subprocess.Popen[str]) -> None:
+    if os.name != "nt":
+        return
+    import ctypes
+    from ctypes import wintypes
+
+    ntdll = ctypes.WinDLL("ntdll")
+    ntdll.NtResumeProcess.argtypes = (wintypes.HANDLE,)
+    ntdll.NtResumeProcess.restype = ctypes.c_long
+    status = ntdll.NtResumeProcess(process._handle)
+    if status != 0:
+        raise OSError(f"failed to resume adapter process: NTSTATUS 0x{status & 0xffffffff:08x}")
+
+
+def _terminate_process_tree(process: subprocess.Popen[str], windows_job: int | None) -> None:
+    if os.name == "nt":
+        if windows_job is not None:
+            _close_windows_job(windows_job)
+            return
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            if process.poll() is None:
+                process.kill()
+        return
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except (OSError, ProcessLookupError):
+        if process.poll() is None:
+            process.kill()
+
+
 def _run_process(
     command: Sequence[str],
     timeout_seconds: int,
@@ -92,23 +219,64 @@ def _run_process(
     selected: Sequence[str] | str = command
     if os.name == "nt" and Path(command[0]).suffix.lower() in {".cmd", ".bat"}:
         selected = ["cmd.exe", "/d", "/s", "/c", subprocess.list2cmdline(list(command))]
-    try:
-        completed = subprocess.run(
-            selected,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout_seconds,
-            check=False,
-            shell=False,
-            env={**os.environ, **(environment or {})},
+    popen_options: dict[str, object] = {}
+    if os.name == "nt":
+        popen_options["creationflags"] = (
+            subprocess.CREATE_NEW_PROCESS_GROUP | _CREATE_SUSPENDED
         )
-    except subprocess.TimeoutExpired as error:
-        return ProcessOutcome(124, error.stdout or "", error.stderr or "adapter timed out")
-    except OSError as error:
-        return ProcessOutcome(127, "", str(error))
-    return ProcessOutcome(completed.returncode, completed.stdout, completed.stderr)
+    else:
+        popen_options["start_new_session"] = True
+    with (
+        tempfile.TemporaryFile(mode="w+t", encoding="utf-8", errors="replace") as stdout_file,
+        tempfile.TemporaryFile(mode="w+t", encoding="utf-8", errors="replace") as stderr_file,
+    ):
+        try:
+            process = subprocess.Popen(
+                selected,
+                stdout=stdout_file,
+                stderr=stderr_file,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                shell=False,
+                env={**os.environ, **(environment or {})},
+                **popen_options,
+            )
+        except OSError as error:
+            return ProcessOutcome(127, "", str(error))
+        windows_job = _windows_kill_on_close_job(process)
+        try:
+            _resume_windows_process(process)
+        except OSError as error:
+            _terminate_process_tree(process, windows_job)
+            return ProcessOutcome(127, "", str(error))
+        timed_out = False
+        try:
+            process.wait(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            _terminate_process_tree(process, windows_job)
+            windows_job = None
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=1)
+        finally:
+            if windows_job is not None:
+                _close_windows_job(windows_job)
+            elif os.name != "nt" and process.poll() is not None:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except (OSError, ProcessLookupError):
+                    pass
+        stdout_file.seek(0)
+        stderr_file.seek(0)
+        stdout = stdout_file.read()
+        stderr = stderr_file.read()
+    if timed_out:
+        return ProcessOutcome(124, stdout, stderr or "adapter timed out")
+    return ProcessOutcome(process.returncode, stdout, stderr)
 
 
 def _version_command(adapter: str, executable: str) -> list[str]:

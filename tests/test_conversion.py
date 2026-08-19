@@ -1,11 +1,69 @@
 import json
+import sys
 import tempfile
+import time
 import unittest
 import zipfile
 from pathlib import Path
 from typing import Sequence
 
-from token_forge.conversion import ProcessOutcome, convert_source
+from token_forge.conversion import ProcessOutcome, _run_process, convert_source
+
+
+class ProcessRunnerTests(unittest.TestCase):
+    def test_completed_parent_does_not_wait_for_or_leave_pipe_inheriting_child(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            marker = Path(temp) / "orphan-survived.txt"
+            child = (
+                "import pathlib,sys,time; "
+                "time.sleep(0.75); "
+                "pathlib.Path(sys.argv[1]).write_text('survived', encoding='utf-8'); "
+                "time.sleep(0.25)"
+            )
+            parent = (
+                "import subprocess,sys; "
+                "subprocess.Popen([sys.executable, '-c', sys.argv[1], sys.argv[2]], "
+                "stdout=sys.stdout, stderr=sys.stderr)"
+            )
+
+            started = time.perf_counter()
+            result = _run_process(
+                [sys.executable, "-c", parent, child, str(marker)],
+                timeout_seconds=3,
+            )
+            elapsed = time.perf_counter() - started
+
+            self.assertEqual(result.returncode, 0)
+            self.assertLess(elapsed, 0.5)
+            time.sleep(0.9)
+            self.assertFalse(marker.exists())
+
+    def test_timeout_terminates_descendants_that_inherit_output_pipes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            marker = Path(temp) / "child-survived.txt"
+            child = (
+                "import pathlib,sys,time; "
+                "time.sleep(6); "
+                "pathlib.Path(sys.argv[1]).write_text('survived', encoding='utf-8')"
+            )
+            parent = (
+                "import subprocess,sys,time; "
+                "subprocess.Popen([sys.executable, '-c', sys.argv[1], sys.argv[2]], "
+                "stdout=sys.stdout, stderr=sys.stderr); "
+                "time.sleep(8)"
+            )
+
+            started = time.perf_counter()
+            result = _run_process(
+                [sys.executable, "-c", parent, child, str(marker)],
+                timeout_seconds=1,
+            )
+            elapsed = time.perf_counter() - started
+
+            self.assertEqual(result.returncode, 124)
+            self.assertLess(elapsed, 4.0)
+            time.sleep(0.25)
+            self.assertFalse(marker.exists())
 
 
 class ConversionTests(unittest.TestCase):

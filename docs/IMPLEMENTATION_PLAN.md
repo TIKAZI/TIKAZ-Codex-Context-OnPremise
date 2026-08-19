@@ -19,6 +19,8 @@ Checkpoint: unit tests pass and no external dependency is required.
 - [x] Extract source literals from DOCX/PPTX XML before allowing conversion success.
 - [x] Detect image-only PDF output and return an actionable `needs-ocr` state.
 - [x] Add an isolated MinerU `pipeline + ocr` adapter gated by local model configuration.
+- [x] Validate one fixed bilingual image-only PDF with measured CER, exact fact recall, latency, and process cleanup.
+- [x] Isolate subprocess trees and prevent inherited output pipes from defeating adapter timeouts on Windows.
 - [ ] Add subprocess adapters for Playwright, local image OCR, yt-dlp, and PySceneDetect.
 
 Checkpoint: each adapter passes one fixed fixture before it is eligible for routing.
@@ -43,4 +45,4 @@ Checkpoint: no enabled stage worsens protected-fact or grounding thresholds.
 - [ ] Cache source acquisition, canonical conversion, indexes, and final query packs separately.
 - [ ] Cover modern and legacy Office, born-digital and scanned PDF, webpages, email, archives, images, subtitles, audio, video, and code repositories.
 - [ ] Route encrypted, DRM-protected, corrupted, handwritten, or unsupported sources to an explicit source-preservation state.
-- [ ] Measure OCR CER, transcription WER, table-cell recall, retrieval recall, grounding, downstream answer quality, latency, VRAM, and provider telemetry separately.
+- [ ] Expand OCR CER beyond the clear synthetic smoke; measure transcription WER, table-cell recall, retrieval recall, grounding, downstream answer quality, latency, VRAM, and provider telemetry separately.

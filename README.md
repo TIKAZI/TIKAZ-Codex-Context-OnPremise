@@ -44,6 +44,8 @@ python -m token_forge convert `
 
 Image-only PDF is not treated as an empty success. If MarkItDown finds no text and no local OCR model is eligible, `convert` returns `needs-ocr` with exit code `4`, keeps the source, and does not write `canonical.md`. A configured local MinerU pipeline can then run `pipeline + ocr` in an isolated staging directory. Remote model acquisition remains opt-in.
 
+Adapter processes run in isolated process groups. On Windows they are attached to a kill-on-close Job Object before execution begins, so a converter timeout or a completed parent process cannot leave pipe-inheriting workers behind. Output is captured through temporary files rather than unbounded in-memory pipes.
+
 ## Development status
 
 The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first document adapter slice now performs local HTML and PDF conversion with explicit verification levels and safe fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
@@ -61,6 +63,8 @@ The fixed seven-case benchmark currently reports:
 | Code / contract / table | Safety pass-through | unchanged | 0% | 1.00 |
 
 These are deterministic estimates on repository fixtures, not provider billing telemetry, universal accuracy, or a promise of the same saving on other material. Run the benchmark on your own corpus before enabling an adapter.
+
+The separate scanned-PDF smoke uses a one-page bilingual raster fixture with no text layer. On the checked Windows host, MarkItDown correctly returned empty output and MinerU 3.4.5 completed the OCR fallback in 27.877 seconds; the full command exited successfully in 33.693 seconds. After NFKC normalization and removal of Markdown heading markers and whitespace, the 100-character reference had edit distance `0` (CER `0.00%`), and all five protected facts were recovered exactly. See [`benchmarks/results/mineru-bilingual-scan.json`](benchmarks/results/mineru-bilingual-scan.json). This is evidence for that clear synthetic page only, not a general OCR or token-saving claim.
 
 ```powershell
 $env:PYTHONPATH='src'

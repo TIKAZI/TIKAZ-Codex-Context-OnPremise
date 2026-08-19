@@ -1,0 +1,62 @@
+{
+  "case_id": "mineru-bilingual-scan",
+  "run_date": "2026-08-19",
+  "source": {
+    "path": "benchmarks/fixtures/mineru-bilingual-scan.pdf",
+    "sha256": "10187de4b2bae3428d8ffd47d442b37eb40e4e8ba95a95a5f17e0e2802ff0f8b",
+    "bytes": 71034,
+    "pages": 1,
+    "text_layer": false,
+    "kind": "synthetic clear raster scan"
+  },
+  "route": [
+    {
+      "adapter": "markitdown",
+      "version": "0.1.7",
+      "status": "empty-output",
+      "elapsed_ms": 1082
+    },
+    {
+      "adapter": "mineru",
+      "version": "3.4.5",
+      "backend": "pipeline",
+      "method": "ocr",
+      "formula": false,
+      "table": false,
+      "status": "success",
+      "elapsed_ms": 27877
+    }
+  ],
+  "result": {
+    "cli_exit_code": 0,
+    "total_elapsed_ms": 33693,
+    "wall_elapsed_ms": 33801,
+    "markdown_bytes": 165,
+    "verification_level": "output-only",
+    "protected_recall": null,
+    "surviving_adapter_processes": 0
+  },
+  "ocr_metrics": {
+    "normalization": "Unicode NFKC; remove Markdown heading markers and whitespace only",
+    "reference_characters": 100,
+    "candidate_characters": 100,
+    "edit_distance": 0,
+    "cer": 0.0,
+    "exact_fact_recall": 1.0,
+    "exact_fact_hits": 5,
+    "exact_fact_total": 5,
+    "facts": [
+      "v6.7.8",
+      "2026-08-18",
+      "python migrate.py --target v6.7.8",
+      "TKZ-2026-0818",
+      "128,640.50 CNY"
+    ]
+  },
+  "environment": {
+    "os": "Windows",
+    "gpu": "NVIDIA GeForce RTX 5060 Ti 16 GB",
+    "model_source": "local"
+  },
+  "claim_boundary": "This result applies only to the checked clear synthetic page. It is not a universal OCR accuracy, latency, or token-saving claim."
+}

@@ -73,4 +73,4 @@ python -m token_forge benchmark --manifest benchmarks\manifest.json --output ben
 
 ## Current evidence boundary
 
-The repository benchmark measures estimated text tokens and declared literal-evidence recall. It does not yet measure source-file upload cost, OCR/layout fidelity, image evidence, downstream answer accuracy, or provider-reported prompt usage. Those claims require adapter-specific fixtures and authorized telemetry before publication.
+The repository benchmark measures estimated text tokens and declared literal-evidence recall. A separate clear synthetic scanned-PDF smoke records OCR CER, exact fact recall, and latency for one fixed MinerU fixture. The project does not yet measure source-file upload cost, general OCR/layout fidelity, image evidence, downstream answer accuracy, or provider-reported prompt usage. Those broader claims require additional adapter-specific fixtures and authorized telemetry before publication.
