@@ -11,8 +11,8 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 | Scans and images | PNG, JPEG, WebP, TIFF, BMP | PaddleOCR | MinerU or selected vision crop |
 | E-books | EPUB | MarkItDown or Pandoc | preserve source |
 | Web | URL, HTML, MHTML | Defuddle | Playwright render → Defuddle → HTML source |
-| Email | EML, MSG | planned message parser | currently unavailable; preserve source |
-| Archives | ZIP, 7Z, TAR, GZ | planned bounded extraction | currently unavailable; inventory/source only |
+| Email | EML | Python email parser: headers, body, attachment inventory | MSG and attachment content remain source-only |
+| Archives | ZIP | bounded in-place inventory and selected text read | 7Z/TAR/GZ remain source-only; nested ZIP is inventory-only |
 | Subtitles | SRT, VTT, ASS | native parser | source preservation |
 | Audio | MP3, WAV, M4A, AAC, FLAC, OGG, OPUS | existing faster-whisper | platform transcript or source |
 | Video | MP4, MKV, MOV, WebM, AVI, M4V, TS, MTS | FFmpeg + faster-whisper | keyframes + OCR/vision |
@@ -30,7 +30,7 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 
 These cases must fail visibly or retain the source. They must never be represented as successfully compressed.
 
-The v1 acceptance manifest keeps EML and ZIP as visible optional failures until production routes and security limits are implemented.
+The v1 acceptance manifest verifies native EML and bounded ZIP routes. ZIP members are never written to disk by this route; unsafe paths, symlinks, encrypted entries, more than 256 entries, entries over 16 MiB, totals over 64 MiB, and compression ratios over 100:1 fail closed. Nested archives are listed but never recursively opened.
 
 ## Token and quality ledger
 

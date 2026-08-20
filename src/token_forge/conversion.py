@@ -18,6 +18,7 @@ from xml.etree import ElementTree
 
 from .protection import extract_protected_literals, protected_recall
 from .router import profile_source
+from .structured import StructuredSourceError, convert_eml, convert_zip
 
 
 @dataclass(frozen=True)
@@ -411,6 +412,13 @@ def _source_literals(source: Path) -> tuple[str, ...] | None:
     suffix = source.suffix.lower()
     if suffix in {".docx", ".pptx"}:
         return extract_protected_literals(_ooxml_text(source))
+    if suffix == ".eml":
+        return extract_protected_literals(convert_eml(source))
+    if suffix == ".zip":
+        try:
+            return extract_protected_literals(convert_zip(source))
+        except StructuredSourceError:
+            return None
     if suffix not in {".html", ".htm", ".mhtml", ".md", ".txt", ".rst", ".json", ".jsonl", ".yaml", ".yml"}:
         return None
     text = source.read_text(encoding="utf-8", errors="replace")
@@ -456,6 +464,56 @@ def convert_source(
     verification_level = "source-literal" if protected_source is not None else "output-only"
     canonical = output_dir / "canonical.md"
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    native_adapters = {".eml": ("email-parser", convert_eml), ".zip": ("bounded-zip", convert_zip)}
+    native = native_adapters.get(source.suffix.lower())
+    if native is not None:
+        adapter, converter = native
+        if requested_adapter not in {"auto", adapter}:
+            raise ValueError(f"adapter is not implemented: {requested_adapter}")
+        attempt_started = time.perf_counter()
+        try:
+            converted = converter(source)
+        except StructuredSourceError as error:
+            canonical.unlink(missing_ok=True)
+            result = ConversionResult(
+                success=False,
+                status="unsafe-archive" if source.suffix.lower() == ".zip" else "failed",
+                source=str(source.resolve()), source_hash=source_hash, family=profile.family,
+                adapter=None, adapter_version=None, output_path=None,
+                protected_literals=protected, protected_recall=None,
+                verification_level=verification_level,
+                elapsed_ms=round((time.perf_counter() - started) * 1000),
+                attempts=(ConversionAttempt(adapter, "rejected", None, "stdlib", round((time.perf_counter() - attempt_started) * 1000), str(error)),),
+            )
+            _write_ledger(output_dir, result)
+            return result
+        converted = _restore_markdown_escaped_literals(converted, protected)
+        recall = protected_recall(protected, converted) if protected_source is not None else None
+        if recall is not None and recall < 1.0:
+            canonical.unlink(missing_ok=True)
+            result = ConversionResult(
+                success=False, status="quality-failed", source=str(source.resolve()),
+                source_hash=source_hash, family=profile.family, adapter=None,
+                adapter_version=None, output_path=None, protected_literals=protected,
+                protected_recall=recall, verification_level=verification_level,
+                elapsed_ms=round((time.perf_counter() - started) * 1000),
+                attempts=(ConversionAttempt(adapter, "protected-literal-loss", 0, "stdlib", round((time.perf_counter() - attempt_started) * 1000)),),
+            )
+            _write_ledger(output_dir, result)
+            return result
+        canonical.write_text(converted, encoding="utf-8")
+        result = ConversionResult(
+            success=True, status="success", source=str(source.resolve()),
+            source_hash=source_hash, family=profile.family, adapter=adapter,
+            adapter_version="stdlib", output_path=str(canonical.resolve()),
+            protected_literals=protected, protected_recall=recall,
+            verification_level=verification_level,
+            elapsed_ms=round((time.perf_counter() - started) * 1000),
+            attempts=(ConversionAttempt(adapter, "success", 0, "stdlib", round((time.perf_counter() - attempt_started) * 1000)),),
+        )
+        _write_ledger(output_dir, result)
+        return result
 
     implemented = {"defuddle", "markitdown", "docling", "mineru"}
     if requested_adapter == "auto":

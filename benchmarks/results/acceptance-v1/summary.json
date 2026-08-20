@@ -14,7 +14,7 @@
     "mean_character_error_rate": 0.0,
     "protected_fact_cases": 14,
     "protected_fact_denominator": 43,
-    "protected_fact_recall": 0.9069767441860465,
+    "protected_fact_recall": 1.0,
     "table_cell_cases": 2,
     "table_cell_denominator": 9,
     "table_cell_recall": 1.0
@@ -31,7 +31,7 @@
   },
   "provider_token_telemetry": "Pending",
   "required": {
-    "case_count": 13,
+    "case_count": 15,
     "efficiency": {
       "mean_token_reduction_ratio": 0.30494958668495387,
       "measured_cases": 4,
@@ -43,8 +43,8 @@
       "anchor_recall": 1.0,
       "character_error_rate_cases": 2,
       "mean_character_error_rate": 0.0,
-      "protected_fact_cases": 11,
-      "protected_fact_denominator": 37,
+      "protected_fact_cases": 13,
+      "protected_fact_denominator": 41,
       "protected_fact_recall": 1.0,
       "table_cell_cases": 2,
       "table_cell_denominator": 9,
@@ -62,14 +62,14 @@
     },
     "status_counts": {
       "failed": 0,
-      "passed": 13,
+      "passed": 15,
       "pending": 0
     }
   },
   "schema_version": 1,
   "status_counts": {
-    "failed": 2,
-    "passed": 14,
+    "failed": 0,
+    "passed": 16,
     "pending": 1
   },
   "suite_id": "tikaz-token-forge-full-scenario-v1"

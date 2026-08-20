@@ -36,6 +36,8 @@ For dynamic HTTP(S) pages, use the repository `web` command so rendered HTML, a 
 
 For platform URLs, use `platform-media`; it records metadata and optional subtitles without downloading the media. Do not turn this into an implicit media downloader or bypass platform authorization.
 
+For EML, use the native `email-parser` route: preserve selected headers and readable plain/HTML body, list attachment name/type/decoded size, and never fetch remote content. For ZIP, use `bounded-zip`: read safe text members in place without extracting to disk; reject traversal paths, symlinks, encrypted entries, excessive entry counts, sizes, totals, or compression ratios. Never recurse into nested archives.
+
 For bounded text context, use `optimize` only after `doctor.model_gates` reports the required local files as eligible and the repository's offline validation has passed. Read `model-ledger.json`; a `deterministic-fallback` mode is a valid source-preserving result, not proof that BGE or LLMLingua ran. Never override high-risk pass-through or the protected-literal and token-budget rejection gates.
 
 For release evidence, run `benchmark-acceptance` with the versioned manifest. Publish `summary.json`, `metrics.json`, `cases.json`, and `evidence-card.md` together. Keep required-case metrics separate from the full manifest, retain optional failures, and leave provider telemetry, public-platform state, and visual understanding as `Pending` unless independently measured.

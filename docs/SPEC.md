@@ -74,6 +74,6 @@ python -m token_forge benchmark-acceptance --manifest benchmarks\acceptance-mani
 
 ## Current evidence boundary
 
-The v1 full-scenario suite runs 17 cases: 13 required local routes, three optional capability probes, and one opt-in network probe. On the checked host all required routes passed with separate protected-fact, anchor, table-cell, OCR CER, transcript-fact, WER, token-estimate, routing, and runtime measures. EML and ZIP remain visible unsupported failures; the public-platform case remains `Pending` by default.
+The v1 full-scenario suite runs 17 cases: 15 required local routes, one optional local EPUB route, and one opt-in network probe. On the checked host all 16 local routes passed with separate protected-fact, anchor, table-cell, OCR CER, transcript-fact, WER, token-estimate, routing, and runtime measures. The public-platform case remains `Pending` by default.
 
 The suite still does not measure provider-reported prompt usage, general OCR/layout fidelity, diagram understanding, multilingual/noisy ASR, authenticated web extraction, or blind downstream answer quality. Fixture results must not be generalized beyond the committed corpus and declared thresholds.

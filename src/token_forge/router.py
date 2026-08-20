@@ -12,6 +12,8 @@ TABLE = {".csv", ".tsv"}
 DOCUMENT = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".odt", ".epub"}
 MEDIA = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".mp4", ".mov", ".mkv", ".avi", ".webm"}
 IMAGE = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
+EMAIL = {".eml"}
+ARCHIVE = {".zip"}
 CODE = {
     ".py", ".js", ".jsx", ".ts", ".tsx", ".rs", ".go", ".java", ".kt",
     ".c", ".cc", ".cpp", ".h", ".hpp", ".cs", ".php", ".rb", ".swift",
@@ -37,6 +39,10 @@ def profile_source(source: str) -> SourceProfile:
         return SourceProfile(source, "media", suffix, "transcribe", ("platform-subtitles", "faster-whisper", "whisperx"), True)
     if suffix in IMAGE:
         return SourceProfile(source, "image", suffix, "ocr-or-vision", ("paddleocr", "mineru", "vision"), False)
+    if suffix in EMAIL:
+        return SourceProfile(source, "email", suffix, "convert", ("email-parser",), False)
+    if suffix in ARCHIVE:
+        return SourceProfile(source, "archive", suffix, "bounded-read", ("bounded-zip",), False)
     if suffix in TEXT or not suffix:
         return SourceProfile(source, "text", suffix, "text", (), True)
     return SourceProfile(source, "unknown", suffix, "source", (), False)

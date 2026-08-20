@@ -27,6 +27,17 @@ class RouterTests(unittest.TestCase):
         self.assertEqual(profile.route, "extract")
         self.assertEqual(profile.adapter_candidates[:2], ("defuddle", "markitdown"))
 
+    def test_email_and_archive_use_bounded_native_routes(self):
+        email = profile_source("message.eml")
+        archive = profile_source("bundle.zip")
+        self.assertEqual((email.family, email.route, email.adapter_candidates), (
+            "email", "convert", ("email-parser",)
+        ))
+        self.assertEqual((archive.family, archive.route, archive.adapter_candidates), (
+            "archive", "bounded-read", ("bounded-zip",)
+        ))
+        self.assertFalse(archive.learned_compression_allowed)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -22,9 +22,9 @@ The three approved local models are complete on G: and passed offline loading. B
 
 ## Full-scenario acceptance gate
 
-The versioned v1 manifest ran 17 real-adapter cases. All 13 required local routes passed. Required-case denominators were 37 protected facts, 9 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Four comparable text cases averaged `30.49%` deterministic estimated-token reduction, including two intentional 0% high-risk pass-through cases.
+The versioned v1 manifest ran 17 cases. All 15 required local routes passed, and the complete local set passed 16/16. Required-case denominators were 41 protected facts, 9 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Four comparable text cases averaged `30.49%` deterministic estimated-token reduction, including two intentional 0% high-risk pass-through cases.
 
-The complete manifest also keeps EML and ZIP as unsupported failures and the opt-in public-platform case as `Pending`. See `docs/BENCHMARK.md` and `benchmarks/results/acceptance-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, visual understanding, authenticated-site support, or multilingual/noisy ASR quality.
+EML and bounded ZIP now pass their declared local source-literal gates. The opt-in public-platform case remains `Pending`. See `docs/BENCHMARK.md` and `benchmarks/results/acceptance-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, visual understanding, authenticated-site support, or multilingual/noisy ASR quality.
 
 ## Verified conversion slice
 

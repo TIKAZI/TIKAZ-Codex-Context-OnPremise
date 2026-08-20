@@ -12,7 +12,7 @@
     "mean_character_error_rate": 0.0,
     "protected_fact_cases": 14,
     "protected_fact_denominator": 43,
-    "protected_fact_recall": 0.9069767441860465,
+    "protected_fact_recall": 1.0,
     "table_cell_cases": 2,
     "table_cell_denominator": 9,
     "table_cell_recall": 1.0

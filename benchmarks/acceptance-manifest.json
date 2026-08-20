@@ -132,14 +132,16 @@
       "id": "email-eml-capability",
       "kind": "conversion",
       "source_file": "acceptance-fixtures/message.eml",
-      "required": false,
+      "required": true,
+      "expected_route": "email-parser",
       "protected": ["EMAIL_ANCHOR_940", "v9.4.0"]
     },
     {
       "id": "archive-zip-capability",
       "kind": "conversion",
       "source_file": "acceptance-fixtures/archive.zip",
-      "required": false,
+      "required": true,
+      "expected_route": "bounded-zip",
       "protected": ["ARCHIVE_ANCHOR_940", "v9.4.0"]
     },
     {

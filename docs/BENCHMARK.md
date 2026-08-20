@@ -8,9 +8,10 @@ Run date: 2026-08-20. Host-specific timing is included in the raw cases.
 
 | Gate | Result |
 |---|---:|
-| Required scenarios | **13 / 13 passed** |
-| Full manifest | 14 passed / 2 failed / 1 pending |
-| Protected facts, required cases | **37 / 37 (100%)** |
+| Required scenarios | **15 / 15 passed** |
+| Full manifest | 16 passed / 0 failed / 1 pending |
+| Protected facts, required cases | **41 / 41 (100%)** |
+| Protected facts, all local cases | **43 / 43 (100%)** |
 | Expected anchors, required cases | **9 / 9 (100%)** |
 | Table cells, required cases | **9 / 9 (100%)** |
 | OCR CER, two controlled fixtures | **0.00% mean** |
@@ -26,11 +27,13 @@ The four text cases are not a representative market corpus: two high-risk cases 
 - safety pass-through for code and structured tables;
 - BGE-M3 retrieval, BGE reranking, and guarded LLMLingua-2 compression;
 - DOCX, PPTX, XLSX, EPUB, and born-digital PDF through MarkItDown;
+- EML headers/body/attachment inventory through the standard-library email parser;
+- bounded ZIP inventory and selected text reading without extracting members to disk;
 - image and scanned-PDF OCR through MinerU;
 - localhost Playwright render followed by Defuddle extraction;
 - FFmpeg, faster-whisper, PySceneDetect, and keyframe extraction.
 
-EML and ZIP remain visible failed capability probes because no production route is implemented. Public platform metadata remains `Pending` in the stable suite because network and login state are intentionally opt-in. Keyframe extraction is measured, but visual understanding and blind downstream answer quality remain `Pending`.
+All 16 local cases pass their declared gates. Public platform metadata remains `Pending` in the stable suite because network and login state are intentionally opt-in. Keyframe extraction is measured, but visual understanding and blind downstream answer quality remain `Pending`.
 
 ## Reproduce
 
@@ -66,6 +69,7 @@ Checked raw results are under [`benchmarks/results/acceptance-v1`](../benchmarks
 - These numbers apply only to the committed fixtures, declared thresholds, local dependency versions, and checked host.
 - OCR CER does not prove general layout, handwriting, formula, or diagram understanding.
 - ASR WER uses generated English speech and standard written-number normalization; it is not a multilingual or noisy-audio result.
+- ZIP coverage is limited to non-encrypted ZIP files with safe member paths, at most 256 entries, 16 MiB per entry, 64 MiB total uncompressed size, and at most 100:1 compression ratio. Nested archives are inventory-only.
+- EML coverage does not include Outlook MSG, remote content loading, attachment content conversion, S/MIME verification, or malware scanning.
 - A smaller context is not considered successful when a protected fact, anchor, table cell, budget, WER, CER, or route gate fails.
 - Do not compare reduction percentages with another project unless corpus, task, tokenizer, budgets, model settings, and downstream rubric are identical.
-

@@ -66,7 +66,7 @@ Adapter processes run in isolated process groups. On Windows they are attached t
 
 ## Verified acceptance status
 
-The checked full-scenario v1 suite passed all **13 / 13 required scenarios** through real local adapters. Across required cases it recovered **37 / 37 protected facts**, **9 / 9 expected anchors**, and **9 / 9 table cells**; two controlled OCR fixtures measured **0.00% mean CER**, while generated English audio/video measured **5.88% mean WER** with **6 / 6 transcript facts** recovered. The full manifest keeps two unsupported capability probes (EML and ZIP) as failures and one public-platform network case as `Pending`.
+The checked full-scenario v1 suite passed all **15 / 15 required scenarios** through real local routes. Across required cases it recovered **41 / 41 protected facts**, **9 / 9 expected anchors**, and **9 / 9 table cells**; across all local cases protected-fact recall was **43 / 43**. Two controlled OCR fixtures measured **0.00% mean CER**, while generated English audio/video measured **5.88% mean WER** with **6 / 6 transcript facts** recovered. The full manifest passed **16 / 16 local cases**; only the opt-in public-platform network case remains `Pending`. EML uses the standard-library email parser, while ZIP is read in place through bounded inventory/text extraction without writing archive members to disk.
 
 See the [full benchmark method and claim boundaries](docs/BENCHMARK.md), [中文说明](docs/BENCHMARK.zh-CN.md), and [raw checked results](benchmarks/results/acceptance-v1). These fixture-specific measurements are not universal accuracy, provider telemetry, or a promise of the same reduction on other material.
 
