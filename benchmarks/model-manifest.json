@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "notes": "Run after all three local models pass offline load; partial model directories are not eligible.",
   "cases": [
     {
       "id": "model-release-migration",

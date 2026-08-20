@@ -103,7 +103,11 @@ class ConvertCliTests(unittest.TestCase):
                 models[name] = model
             report = root / "validation.json"
             report.write_text(
-                '{"validation":{"retrieval":true,"learned_compression":true}}', encoding="utf-8"
+                json.dumps({
+                    "validation": {"retrieval": True, "learned_compression": True},
+                    "validated_models": {name: str(path.resolve()) for name, path in models.items()},
+                }),
+                encoding="utf-8",
             )
             config = root / "local.toml"
             config.write_text(
@@ -117,6 +121,40 @@ class ConvertCliTests(unittest.TestCase):
                 main(["doctor", "--config", str(config)])
             gates = json.loads(stream.getvalue())["model_gates"]
             self.assertTrue(gates["retrieval"]["validated"])
+            self.assertTrue(gates["learned_compression"]["validated"])
+
+    def test_doctor_rejects_validation_report_for_different_model_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            models = {}
+            for name in ("embedding_model", "reranker_model", "llmlingua_model"):
+                model = root / name
+                model.mkdir()
+                (model / "config.json").write_text("{}", encoding="utf-8")
+                with (model / "model.safetensors").open("wb") as stream:
+                    stream.truncate(1_000_001)
+                models[name] = model
+            report = root / "validation.json"
+            report.write_text(json.dumps({
+                "validation": {"retrieval": True, "learned_compression": True},
+                "validated_models": {
+                    "embedding_model": str((root / "different-embedding").resolve()),
+                    "reranker_model": str(models["reranker_model"].resolve()),
+                    "llmlingua_model": str(models["llmlingua_model"].resolve()),
+                },
+            }), encoding="utf-8")
+            config = root / "local.toml"
+            config.write_text(
+                "[adapters]\nretrieval_python = 'python'\nllmlingua_python = 'python'\n"
+                + "\n".join(f"{name} = '{path.as_posix()}'" for name, path in models.items())
+                + f"\nmodel_validation = '{report.as_posix()}'\n",
+                encoding="utf-8",
+            )
+            stream = io.StringIO()
+            with contextlib.redirect_stdout(stream):
+                main(["doctor", "--config", str(config)])
+            gates = json.loads(stream.getvalue())["model_gates"]
+            self.assertFalse(gates["retrieval"]["validated"])
             self.assertTrue(gates["learned_compression"]["validated"])
 
     def test_convert_passes_local_config_and_prints_result(self) -> None:

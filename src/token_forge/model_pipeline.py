@@ -175,22 +175,41 @@ def optimize_text_pack(
             compression_missing = [name for name in compression_required if not adapters.get(name)]
             if compression_missing:
                 raise RuntimeError(f"missing adapters: {', '.join(compression_missing)}")
+            mandatory_text = "\n\n".join(
+                str(by_index[index]["text"]) for index in selected if index in mandatory
+            )
+            compressible = [index for index in selected if index not in mandatory]
+            remaining_budget = budget_tokens - estimate_tokens(mandatory_text) - 1
+            if remaining_budget <= 0 or not compressible:
+                raise RuntimeError("protected blocks consume the requested token budget")
+            compressible_text = "\n\n".join(
+                str(by_index[index]["text"]) for index in compressible
+            )
             compressed = _run_helper(
                 adapters["llmlingua_python"],
                 script_root / "compress_local.py",
                 {
-                    "context": [selected_text],
+                    "context": [compressible_text],
                     "question": query,
                     "model": adapters["llmlingua_model"],
-                    "target_token": budget_tokens,
+                    "target_token": max(1, math.floor(remaining_budget * 0.55)),
                 },
                 timeout_seconds,
             )
-            candidate = str(compressed.get("compressed_prompt", "")).strip()
+            compressed_text = str(compressed.get("compressed_prompt", "")).strip()
+            rendered: list[str] = []
+            compressed_added = False
+            for index in selected:
+                if index in mandatory:
+                    rendered.append(str(by_index[index]["text"]))
+                elif not compressed_added:
+                    rendered.append(compressed_text)
+                    compressed_added = True
+            candidate = "\n\n".join(value for value in rendered if value).strip()
             recall = protected_recall(protected, candidate)
             if recall < 1.0:
                 raise RuntimeError(f"protected literal recall after compression was {recall:.3f}")
-            if not candidate:
+            if not compressed_text:
                 raise RuntimeError("learned compressor returned empty text")
             if estimate_tokens(candidate) > budget_tokens:
                 raise RuntimeError("learned compressor exceeded the requested token budget")

@@ -1,0 +1,49 @@
+{
+  "all_protected_pass": true,
+  "case_count": 4,
+  "cases": [
+    {
+      "fallback_reason": "",
+      "final_tokens_estimated": 68,
+      "id": "model-release-migration",
+      "input_tokens_estimated": 106,
+      "mode": "learned-compressed",
+      "protected_recall": 1.0,
+      "reduction_ratio": 0.3584905660377359
+    },
+    {
+      "fallback_reason": "",
+      "final_tokens_estimated": 85,
+      "id": "model-long-retrieval",
+      "input_tokens_estimated": 509,
+      "mode": "learned-compressed",
+      "protected_recall": 1.0,
+      "reduction_ratio": 0.8330058939096268
+    },
+    {
+      "fallback_reason": "learned models excluded for high-risk material",
+      "final_tokens_estimated": 91,
+      "id": "model-code-pass-through",
+      "input_tokens_estimated": 91,
+      "mode": "safety-pass-through",
+      "protected_recall": 1.0,
+      "reduction_ratio": 0.0
+    },
+    {
+      "fallback_reason": "",
+      "final_tokens_estimated": 55,
+      "id": "model-low-risk-compression",
+      "input_tokens_estimated": 147,
+      "mode": "learned-compressed",
+      "protected_recall": 1.0,
+      "reduction_ratio": 0.6258503401360545
+    }
+  ],
+  "measurement": "deterministic token estimate; not provider telemetry",
+  "model_routes_completed": 3,
+  "schema_version": 1,
+  "validation": {
+    "learned_compression": true,
+    "retrieval": true
+  }
+}

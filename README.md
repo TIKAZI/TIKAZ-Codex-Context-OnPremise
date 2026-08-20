@@ -50,6 +50,8 @@ python -m token_forge optimize `
 
 `optimize` assigns stable content-derived chunk IDs, runs BGE-M3 dense retrieval and BGE reranking in an isolated local process, and only then considers LLMLingua-2 when selected low-risk prose still exceeds the budget. Learned output is rejected if it is empty, exceeds the budget, or drops a protected number, date, version, URL, command, or citation literal. Code, commands, contracts, tables, financial material, and security evidence bypass learned models. Any model failure falls back visibly to the deterministic selector and records the reason in `model-ledger.json`. Helpers force Hugging Face and Transformers offline mode; they never acquire models during an `optimize` run.
 
+Protected blocks are never sent to LLMLingua-2. They are reattached verbatim around compressed low-risk prose, then the complete output must pass both protected-literal recall and the Token Forge hard budget. This avoids treating the compressor's tokenizer count as equivalent to the project's conservative estimate.
+
 Dynamic pages can be rendered locally with `python -m token_forge web --url <https-url> --output <dir>`. The command stores the rendered HTML, a viewport screenshot, browser metadata, and the Defuddle conversion ledger. It requires configured Playwright browser assets; no remote page content is sent to a service by Token Forge itself.
 
 Local audio/video can be processed with `python -m token_forge media --input <file> --output <dir>`. The route extracts 16 kHz mono audio with FFmpeg, transcribes with the configured local faster-whisper model, and records PySceneDetect scenes/keyframes when available. CUDA is attempted first; if the configured environment cannot load CUDA libraries, the helper visibly falls back to CPU int8. Platform URLs remain metadata/subtitle workflows and never download media implicitly; use `python -m token_forge platform-media --url <https-url> --output <dir>` for that route. It records `yt-dlp --dump-single-json` metadata and optional subtitles, while media download is intentionally unsupported.
@@ -76,9 +78,20 @@ The fixed seven-case benchmark currently reports:
 
 These are deterministic estimates on repository fixtures, not provider billing telemetry, universal accuracy, or a promise of the same saving on other material. Run the benchmark on your own corpus before enabling an adapter.
 
+The separate four-case local-model benchmark reports:
+
+| Case | Route | Estimated input → final | Estimated reduction | Declared evidence recall |
+|---|---|---:|---:|---:|
+| Release migration | BGE + reranker + LLMLingua-2 | 106 → 68 | 35.85% | 1.00 |
+| Long retrieval | BGE + reranker + LLMLingua-2 | 509 → 85 | 83.30% | 1.00 |
+| Low-risk prose | BGE + reranker + LLMLingua-2 | 147 → 55 | 62.59% | 1.00 |
+| Code | Safety pass-through | 91 → 91 | 0% | 1.00 |
+
+See [`benchmarks/results/model-results.json`](benchmarks/results/model-results.json). The model run is also fixture-specific and uses deterministic token estimates rather than provider billing telemetry.
+
 The separate scanned-PDF smoke uses a one-page bilingual raster fixture with no text layer. On the checked Windows host, MarkItDown correctly returned empty output and MinerU 3.4.5 completed the OCR fallback in 27.877 seconds; the full command exited successfully in 33.693 seconds. After NFKC normalization and removal of Markdown heading markers and whitespace, the 100-character reference had edit distance `0` (CER `0.00%`), and all five protected facts were recovered exactly. See [`benchmarks/results/mineru-bilingual-scan.json`](benchmarks/results/mineru-bilingual-scan.json). This is evidence for that clear synthetic page only, not a general OCR or token-saving claim.
 
-The local dynamic-page smoke completed through Playwright Chromium 1234 -> Defuddle with source-literal recall `1.0`, leaving rendered HTML, viewport PNG, and metadata. The local media smoke processed a 14.23-second video in 34.839 seconds, produced 13 timestamped transcript segments, 7 scene groups, and 21 keyframes. Its CUDA attempt fell back to CPU int8 because `cublas64_12.dll` was unavailable; this is a fallback validation, not a GPU performance claim.
+The local dynamic-page smoke completed through Playwright Chromium 1234 -> Defuddle with source-literal recall `1.0`, leaving rendered HTML, viewport PNG, and metadata. After the helper began discovering the existing local cublas and cuDNN DLL directories, the complete local media smoke processed a 14.23-second video in 5.486 seconds, produced 10 timestamped transcript segments, 7 scene groups, and 21 keyframes, and recorded `cuda`, `float16`, `fallback: false`. This is evidence for the checked host and fixture only, not a general speed or WER claim.
 
 ```powershell
 $env:PYTHONPATH='src'

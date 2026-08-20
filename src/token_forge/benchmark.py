@@ -126,6 +126,11 @@ def run_model_manifest(
         "case_count": len(cases),
         "all_protected_pass": all(case["protected_recall"] == 1.0 for case in cases),
         "model_routes_completed": sum(case["mode"] in {"model-retrieved", "learned-compressed"} for case in cases),
+        "validated_models": {
+            name: str(Path(adapters[name]).resolve())
+            for name in ("embedding_model", "reranker_model", "llmlingua_model")
+            if adapters.get(name)
+        },
         "validation": {
             "retrieval": any(case["mode"] in {"model-retrieved", "learned-compressed"} for case in cases)
             and all(case["protected_recall"] == 1.0 for case in cases),

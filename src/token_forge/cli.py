@@ -118,18 +118,27 @@ def _model_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
     statuses = {status.name: status for status in probe_all(configured=config.adapters)}
 
     validation: dict[str, object] = {}
+    validated_models: dict[str, object] = {}
     report_path = config.adapters.get("model_validation")
     if report_path and Path(report_path).is_file():
         try:
             report = json.loads(Path(report_path).read_text(encoding="utf-8"))
             if isinstance(report.get("validation"), dict):
                 validation = report["validation"]
+            if isinstance(report.get("validated_models"), dict):
+                validated_models = report["validated_models"]
         except (OSError, ValueError, TypeError, json.JSONDecodeError):
             validation = {}
 
-    def gate(stage: str, names: tuple[str, ...]) -> dict[str, object]:
+    def gate(stage: str, names: tuple[str, ...], model_keys: tuple[str, ...]) -> dict[str, object]:
         missing = [name for name in names if not statuses[name].available]
-        validated = not missing and validation.get(stage) is True
+        models_match = all(
+            key in validated_models
+            and key in config.adapters
+            and Path(str(validated_models[key])).resolve() == Path(config.adapters[key]).resolve()
+            for key in model_keys
+        )
+        validated = not missing and validation.get(stage) is True and models_match
         return {
             "eligible": not missing,
             "validated": validated,
@@ -138,6 +147,8 @@ def _model_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
             "reason": (
                 "offline fixture validation passed"
                 if validated
+                else "validation report does not match configured model paths"
+                if not missing and validation.get(stage) is True
                 else "required local runtime and model weights detected; run offline validation"
                 if not missing
                 else f"missing or incomplete: {', '.join(missing)}"
@@ -145,8 +156,16 @@ def _model_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
         }
 
     return {
-        "retrieval": gate("retrieval", ("retrieval-python", "embedding-model", "reranker-model")),
-        "learned_compression": gate("learned_compression", ("llmlingua-python", "llmlingua-model")),
+        "retrieval": gate(
+            "retrieval",
+            ("retrieval-python", "embedding-model", "reranker-model"),
+            ("embedding_model", "reranker_model"),
+        ),
+        "learned_compression": gate(
+            "learned_compression",
+            ("llmlingua-python", "llmlingua-model"),
+            ("llmlingua_model",),
+        ),
     }
 
 

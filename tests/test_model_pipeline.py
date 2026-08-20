@@ -58,26 +58,34 @@ class ModelPipelineTests(unittest.TestCase):
             self.assertEqual(first.protected_recall, 1.0)
             self.assertTrue((Path(temp) / "model-ledger.json").is_file())
 
-    def test_rejects_learned_compression_that_drops_protected_fact(self) -> None:
+    def test_learned_compression_never_receives_protected_blocks(self) -> None:
         source = (
             "Release v3.2.1 is scheduled for 2026-09-01.\n\n"
             "Migration prose describes validation and rollback steps.\n\n"
             "More explanatory prose for operators and maintainers."
         )
 
+        compression_payloads = []
+
         def fake_helper(_python, script, payload, _timeout):
             if script.name == "retrieve_local.py":
                 return {"ranked": payload["chunks"]}
-            return {"compressed_prompt": "Migration summary without the required facts."}
+            compression_payloads.append(payload)
+            return {"compressed_prompt": "Migration rollback steps for maintainers."}
 
         with patch("token_forge.model_pipeline._run_helper", side_effect=fake_helper):
             result = optimize_text_pack(source, "migration", 25, self.adapters)
 
-        self.assertNotEqual(result.mode, "learned-compressed")
+        self.assertEqual(result.mode, "learned-compressed")
         self.assertIn("v3.2.1", result.text)
         self.assertIn("2026-09-01", result.text)
         self.assertEqual(result.protected_recall, 1.0)
-        self.assertIn("protected", result.fallback_reason)
+        self.assertLessEqual(result.final_tokens, 25)
+        self.assertEqual(len(compression_payloads), 1)
+        compressed_source = compression_payloads[0]["context"][0]
+        self.assertNotIn("v3.2.1", compressed_source)
+        self.assertNotIn("2026-09-01", compressed_source)
+        self.assertLess(compression_payloads[0]["target_token"], 25)
 
     def test_model_failure_falls_back_to_deterministic_selection(self) -> None:
         source = "# Fact\nUse v4.0.1.\n\n# Noise\nDecorative filler.\n\n# More\nRelease notes."

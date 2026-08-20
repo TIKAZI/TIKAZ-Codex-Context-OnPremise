@@ -1,4 +1,4 @@
-# Local installation status (2026-08-19)
+# Local installation status (2026-08-20)
 
 ## Package and command layer
 
@@ -13,12 +13,12 @@
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
 | PySceneDetect | 0.7.1 | real local video produced 7 scenes and 21 keyframes | broader codec/transition fixtures pending |
 | faster-whisper | existing large-v3 | local CUDA DLL discovery repaired; full 14.23-second media route passed in 5.486 seconds | broader WER/language fixtures pending |
-| FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | import passed | embedding weights pending |
-| LLMLingua | 0.2.2 | import passed | model and low-risk quality gate pending |
+| FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | BGE-M3 and BGE reranker loaded fully offline | fixed retrieval/reranking fixtures passed |
+| LLMLingua | 0.2.2 | local XLM-RoBERTa model loaded and compressed prose offline | fixed low-risk compression fixtures passed |
 
 ## Model download boundary
 
-The three approved local models are downloading to G: with resumable Hugging Face transfers. Partial directories are not considered usable and doctor reports them as unavailable until the config and substantial weight files are complete, followed by an explicit offline load and fixed quality gate. BM25/deterministic selection remains the measured fallback. No percentage or retrieval quality claim is made from partial models.
+The three approved local models are complete on G: and passed offline loading. BGE-M3 produced 1024-dimensional normalized embeddings; on the checked smoke, migration evidence scored `0.8559` against the migration query and unrelated design background scored `0.3751`. The BGE reranker scored the related pair `0.1691` and the unrelated pair `0.0000229`. These two-pair checks establish loading and ordering direction only, not general retrieval quality.
 
 ## Verified conversion slice
 
@@ -36,7 +36,7 @@ The first real run exposed a Windows process-lifecycle defect: MinerU wrote its 
 
 The dynamic-page smoke now uses the cached local Chromium 1234 assets under `G:\CodexTools\models\token-forge\playwright`; the first attempt correctly failed when that browser path was not exported, then passed after the local path was configured. The media smoke used `F:\CodexVideoSummary\data\media\BV1TU3g66Exd.mp4` as a read-only source and wrote its transcript, scene CSV, and keyframes under `F:\TIKAZ-Token-Forge-Data\outputs\media-smoke-cpu2`.
 
-The configured BGE-M3, reranker, and LLMLingua model directories remain unavailable while their approved one-time downloads and fixed local quality gates are incomplete. Runtime optimization itself forces offline mode and cannot fetch a model. BM25/deterministic extraction remains the only publishable retrieval/compression path until those gates pass.
+The fixed four-case model benchmark completed three low-risk model routes and one code safety pass-through. Estimated input to final tokens were `106 -> 68`, `509 -> 85`, `147 -> 55`, and `91 -> 91`; declared protected-fact recall was `1.0` for every case. `doctor.model_gates` reports both retrieval and learned compression as `validated: true` when pointed at this local report. See `benchmarks/results/model-results.json`. These are fixture-specific deterministic estimates, not provider telemetry or a universal saving/accuracy claim.
 
 The same local media fixture was rerun after adding Windows DLL discovery for the existing NVIDIA cublas and cuDNN packages in the Whisper environment. The complete media command finished in 5.486 seconds and wrote `transcription-runtime.json` with `device: cuda`, `compute_type: float16`, and `fallback: false`, alongside 10 timestamped transcript segments and 21 keyframes. This supersedes the earlier CPU-fallback diagnosis for the checked host and fixture; it is not a general speed or WER claim.
 

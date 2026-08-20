@@ -1,6 +1,11 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from token_forge.benchmark import run_case
+from token_forge.benchmark import run_case, run_model_manifest
 
 
 class BenchmarkTests(unittest.TestCase):
@@ -38,6 +43,34 @@ class BenchmarkTests(unittest.TestCase):
         self.assertEqual(result["protected_recall"], 1.0)
         self.assertEqual(result["profiles"]["canonical"]["status"], "not-eligible")
         self.assertEqual(result["profiles"]["learned-compression"]["status"], "not-eligible")
+
+    def test_model_report_binds_validation_to_configured_model_paths(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            fixture = root / "fixture.md"
+            fixture.write_text("Release context.", encoding="utf-8")
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"cases": [{
+                "id": "binding",
+                "source_file": "fixture.md",
+                "query": "release",
+                "budget_tokens": 20,
+            }]}), encoding="utf-8")
+            adapters = {
+                "embedding_model": str(root / "embedding"),
+                "reranker_model": str(root / "reranker"),
+                "llmlingua_model": str(root / "compressor"),
+            }
+            model_result = SimpleNamespace(
+                text="Release context.", mode="model-retrieved",
+                input_tokens=4, final_tokens=4, reduction_ratio=0.0,
+                fallback_reason="",
+            )
+            with patch("token_forge.benchmark.optimize_text_pack", return_value=model_result):
+                report = run_model_manifest(manifest, root / "output", adapters)
+            self.assertEqual(report.get("validated_models"), {
+                name: str(Path(path).resolve()) for name, path in adapters.items()
+            })
 
 
 if __name__ == "__main__":
