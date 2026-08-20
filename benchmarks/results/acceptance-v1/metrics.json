@@ -1,0 +1,30 @@
+{
+  "efficiency": {
+    "mean_token_reduction_ratio": 0.30494958668495387,
+    "measured_cases": 4,
+    "measurement": "deterministic token estimate; not provider telemetry"
+  },
+  "fidelity": {
+    "anchor_cases": 7,
+    "anchor_denominator": 9,
+    "anchor_recall": 1.0,
+    "character_error_rate_cases": 2,
+    "mean_character_error_rate": 0.0,
+    "protected_fact_cases": 14,
+    "protected_fact_denominator": 43,
+    "protected_fact_recall": 0.9069767441860465,
+    "table_cell_cases": 2,
+    "table_cell_denominator": 9,
+    "table_cell_recall": 1.0
+  },
+  "multimodal": {
+    "mean_word_error_rate": 0.058823529411764705,
+    "media_cases": 2,
+    "note": "keyframe extraction is measured separately and is not evidence of visual understanding",
+    "transcript_cases": 2,
+    "transcript_fact_denominator": 6,
+    "transcript_fact_recall": 1.0,
+    "visual_understanding": "Pending",
+    "word_error_rate_cases": 2
+  }
+}

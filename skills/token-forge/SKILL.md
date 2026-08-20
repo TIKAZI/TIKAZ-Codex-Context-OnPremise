@@ -38,6 +38,8 @@ For platform URLs, use `platform-media`; it records metadata and optional subtit
 
 For bounded text context, use `optimize` only after `doctor.model_gates` reports the required local files as eligible and the repository's offline validation has passed. Read `model-ledger.json`; a `deterministic-fallback` mode is a valid source-preserving result, not proof that BGE or LLMLingua ran. Never override high-risk pass-through or the protected-literal and token-budget rejection gates.
 
+For release evidence, run `benchmark-acceptance` with the versioned manifest. Publish `summary.json`, `metrics.json`, `cases.json`, and `evidence-card.md` together. Keep required-case metrics separate from the full manifest, retain optional failures, and leave provider telemetry, public-platform state, and visual understanding as `Pending` unless independently measured.
+
 Treat OCR metrics as fixture-specific. The repository's clear bilingual scan is a smoke gate, not permission to claim universal CER, accuracy, latency, or token savings. Keep scanned-PDF results at `output-only` unless a separate source-derived verification path exists.
 
 ## Completion gate

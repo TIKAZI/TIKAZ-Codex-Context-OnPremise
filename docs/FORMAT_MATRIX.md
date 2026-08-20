@@ -11,8 +11,8 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 | Scans and images | PNG, JPEG, WebP, TIFF, BMP | PaddleOCR | MinerU or selected vision crop |
 | E-books | EPUB | MarkItDown or Pandoc | preserve source |
 | Web | URL, HTML, MHTML | Defuddle | Playwright render → Defuddle → HTML source |
-| Email | EML, MSG | message parser | attachment routes + source |
-| Archives | ZIP, 7Z, TAR, GZ | bounded extraction | inventory only when unsafe |
+| Email | EML, MSG | planned message parser | currently unavailable; preserve source |
+| Archives | ZIP, 7Z, TAR, GZ | planned bounded extraction | currently unavailable; inventory/source only |
 | Subtitles | SRT, VTT, ASS | native parser | source preservation |
 | Audio | MP3, WAV, M4A, AAC, FLAC, OGG, OPUS | existing faster-whisper | platform transcript or source |
 | Video | MP4, MKV, MOV, WebM, AVI, M4V, TS, MTS | FFmpeg + faster-whisper | keyframes + OCR/vision |
@@ -29,6 +29,8 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 - layouts whose reading order, formulas, or table structure cannot be verified.
 
 These cases must fail visibly or retain the source. They must never be represented as successfully compressed.
+
+The v1 acceptance manifest keeps EML and ZIP as visible optional failures until production routes and security limits are implemented.
 
 ## Token and quality ledger
 

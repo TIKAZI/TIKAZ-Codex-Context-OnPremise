@@ -14,6 +14,30 @@ from token_forge.web import WebResult
 
 
 class ConvertCliTests(unittest.TestCase):
+    def test_acceptance_benchmark_uses_local_config_and_fails_on_required_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest = root / "manifest.json"
+            manifest.write_text('{"schema_version": 1, "cases": []}', encoding="utf-8")
+            config = root / "local.toml"
+            config.write_text('[adapters]\nmarkitdown = "G:/markitdown.exe"\n', encoding="utf-8")
+            report = {
+                "case_count": 1,
+                "status_counts": {"passed": 0, "failed": 1, "pending": 0},
+                "all_required_pass": False,
+            }
+            stream = io.StringIO()
+            with patch("token_forge.cli.run_acceptance_manifest", return_value=report) as run:
+                with contextlib.redirect_stdout(stream):
+                    code = main([
+                        "benchmark-acceptance", "--manifest", str(manifest),
+                        "--output", str(root / "out"), "--config", str(config),
+                    ])
+
+            self.assertEqual(code, 2)
+            self.assertEqual(json.loads(stream.getvalue())["all_required_pass"], False)
+            run.assert_called_once_with(manifest, root / "out", {"markitdown": "G:/markitdown.exe"}, allow_network=False)
+
     def test_web_command_prints_render_result(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

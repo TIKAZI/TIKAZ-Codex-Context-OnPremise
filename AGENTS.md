@@ -10,6 +10,7 @@ Build a local-first, dependency-rich context compiler for Codex. Reduce total mo
 - Validate Skill: `python C:\Users\Jiufang\.codex-shared\skills\.system\skill-creator\scripts\quick_validate.py skills\token-forge`
 - CLI: `python -m token_forge --help`
 - Benchmark: `python -m token_forge benchmark --manifest benchmarks\manifest.json --output benchmark-results`
+- Full acceptance: `python -m token_forge benchmark-acceptance --manifest benchmarks\acceptance-manifest.json --output benchmark-acceptance-results --config .token-forge.local.toml`
 
 ## Conventions
 
@@ -26,4 +27,3 @@ Build a local-first, dependency-rich context compiler for Codex. Reduce total mo
 - Ask before downloading models, installing large dependencies, or sending material to a remote service.
 - Never claim a universal compression rate or accuracy result.
 - Never silently compress code, contracts, tables, financial data, commands, or security-sensitive evidence.
-

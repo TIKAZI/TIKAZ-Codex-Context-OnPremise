@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import signal
 import shutil
 import subprocess
@@ -87,6 +88,21 @@ def _html_visible_text(source: str) -> str:
     parser.feed(source)
     parser.close()
     return "\n".join(parser.parts)
+
+
+def _restore_markdown_escaped_literals(text: str, literals: Sequence[str]) -> str:
+    markdown_punctuation = frozenset("\\`*_{}[]<>()#+-.!|")
+    restored = text.replace("\\_", "_")
+    for literal in sorted(set(literals), key=len, reverse=True):
+        if not literal or literal in restored:
+            continue
+        pattern = "".join(
+            rf"(?:\\)?{re.escape(character)}"
+            if character in markdown_punctuation else re.escape(character)
+            for character in literal
+        )
+        restored = re.sub(pattern, lambda _: literal, restored)
+    return restored
 
 
 def _windows_kill_on_close_job(process: subprocess.Popen[str]) -> int | None:
@@ -503,6 +519,7 @@ def convert_source(
             continue
 
         converted = produced_path.read_text(encoding="utf-8", errors="replace")
+        converted = _restore_markdown_escaped_literals(converted, protected)
         recall = protected_recall(protected, converted) if protected_source is not None else None
         if recall is not None:
             best_recall = max(best_recall or 0.0, recall)
@@ -519,8 +536,7 @@ def convert_source(
                 shutil.rmtree(cleanup_root, ignore_errors=True)
             continue
 
-        if produced_path != canonical:
-            canonical.write_text(converted, encoding="utf-8")
+        canonical.write_text(converted, encoding="utf-8")
         if cleanup_root:
             shutil.rmtree(cleanup_root, ignore_errors=True)
         attempts.append(ConversionAttempt(adapter, "success", outcome.returncode, version_text, elapsed_ms))

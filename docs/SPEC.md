@@ -13,6 +13,7 @@ python -m token_forge doctor
 python -m token_forge profile --input <path> --query <task>
 python -m token_forge pack --input <path> --query <task> --budget 4000 --output <dir> --cache-dir <cache>
 python -m token_forge benchmark --manifest benchmarks\manifest.json --output benchmark-results
+python -m token_forge benchmark-acceptance --manifest benchmarks\acceptance-manifest.json --output benchmark-acceptance-results --config .token-forge.local.toml
 ```
 
 ## Architecture
@@ -73,4 +74,6 @@ python -m token_forge benchmark --manifest benchmarks\manifest.json --output ben
 
 ## Current evidence boundary
 
-The repository benchmark measures estimated text tokens and declared literal-evidence recall. A separate clear synthetic scanned-PDF smoke records OCR CER, exact fact recall, and latency for one fixed MinerU fixture. The project does not yet measure source-file upload cost, general OCR/layout fidelity, image evidence, downstream answer accuracy, or provider-reported prompt usage. Those broader claims require additional adapter-specific fixtures and authorized telemetry before publication.
+The v1 full-scenario suite runs 17 cases: 13 required local routes, three optional capability probes, and one opt-in network probe. On the checked host all required routes passed with separate protected-fact, anchor, table-cell, OCR CER, transcript-fact, WER, token-estimate, routing, and runtime measures. EML and ZIP remain visible unsupported failures; the public-platform case remains `Pending` by default.
+
+The suite still does not measure provider-reported prompt usage, general OCR/layout fidelity, diagram understanding, multilingual/noisy ASR, authenticated web extraction, or blind downstream answer quality. Fixture results must not be generalized beyond the committed corpus and declared thresholds.

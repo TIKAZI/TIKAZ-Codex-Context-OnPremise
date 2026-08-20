@@ -42,6 +42,10 @@ python -m token_forge optimize `
   --budget 2000 `
   --output path\to\context-pack `
   --config .token-forge.local.toml
+python -m token_forge benchmark-acceptance `
+  --manifest benchmarks\acceptance-manifest.json `
+  --output benchmark-acceptance-results `
+  --config .token-forge.local.toml
 ```
 
 `convert` routes local HTML through Defuddle, and documents/PDF through MarkItDown with Docling available as an explicit fallback. A successful run writes `canonical.md` and `conversion.json`. The ledger records the source SHA-256, selected adapter and version, timings, every attempted fallback, verification level, and protected-literal recall. HTML and DOCX/PPTX can be source-literal checked; binary PDF conversion is currently reported as `output-only` unless an independent source extractor is configured. If a source-literal converter drops a protected version, date, URL, number, or command, Token Forge rejects the Markdown instead of silently presenting it as successful.
@@ -60,9 +64,11 @@ Image-only PDF is not treated as an empty success. If MarkItDown finds no text a
 
 Adapter processes run in isolated process groups. On Windows they are attached to a kill-on-close Job Object before execution begins, so a converter timeout or a completed parent process cannot leave pipe-inheriting workers behind. Output is captured through temporary files rather than unbounded in-memory pipes.
 
-## Development status
+## Verified acceptance status
 
-The dependency-free controller MVP is working. It includes source routing, protected-literal checks, deterministic selection, high-risk pass-through, persistent content-addressed caching, adapter diagnostics, and a reproducible four-profile benchmark. The first document adapter slice now performs local HTML and PDF conversion with explicit verification levels and safe fallback. Other installed packages remain ineligible for automatic routing until their own fixed fixtures and quality gates pass. See [installation status](docs/INSTALL_STATUS.md) rather than treating package installation as proof of universal readiness.
+The checked full-scenario v1 suite passed all **13 / 13 required scenarios** through real local adapters. Across required cases it recovered **37 / 37 protected facts**, **9 / 9 expected anchors**, and **9 / 9 table cells**; two controlled OCR fixtures measured **0.00% mean CER**, while generated English audio/video measured **5.88% mean WER** with **6 / 6 transcript facts** recovered. The full manifest keeps two unsupported capability probes (EML and ZIP) as failures and one public-platform network case as `Pending`.
+
+See the [full benchmark method and claim boundaries](docs/BENCHMARK.md), [中文说明](docs/BENCHMARK.zh-CN.md), and [raw checked results](benchmarks/results/acceptance-v1). These fixture-specific measurements are not universal accuracy, provider telemetry, or a promise of the same reduction on other material.
 
 ## Evidence before claims
 

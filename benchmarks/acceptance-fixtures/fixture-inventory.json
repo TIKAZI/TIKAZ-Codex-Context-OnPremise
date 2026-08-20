@@ -1,0 +1,47 @@
+{
+  "archive.zip": {
+    "bytes": 153
+  },
+  "born-digital.pdf": {
+    "bytes": 1694
+  },
+  "dynamic-page.html": {
+    "bytes": 345
+  },
+  "ebook.epub": {
+    "bytes": 1239
+  },
+  "message.eml": {
+    "bytes": 121
+  },
+  "office-reference.txt": {
+    "bytes": 139
+  },
+  "office.docx": {
+    "bytes": 36856
+  },
+  "scan-reference.txt": {
+    "bytes": 121
+  },
+  "scan.pdf": {
+    "bytes": 68061
+  },
+  "scan.png": {
+    "bytes": 50256
+  },
+  "slides.pptx": {
+    "bytes": 29176
+  },
+  "speech-reference.txt": {
+    "bytes": 102
+  },
+  "speech-video.mp4": {
+    "bytes": 144154
+  },
+  "speech.wav": {
+    "bytes": 670382
+  },
+  "table.xlsx": {
+    "bytes": 4953
+  }
+}

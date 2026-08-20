@@ -133,6 +133,7 @@ def build_text_pack(
             protected_recall=1.0,
             reduction_ratio=0.0,
             source_hash=source_hash,
+            budget_conflict=input_tokens > budget_tokens,
             cache_key=cache_key,
         )
         if cache_dir is not None:

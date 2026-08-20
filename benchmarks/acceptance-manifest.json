@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "suite_id": "tikaz-token-forge-full-scenario-v1",
+  "notes": "Public, generated fixtures exercise real local adapters. Provider telemetry and visual understanding remain separate Pending evidence.",
+  "cases": [
+    {
+      "id": "text-release-pack",
+      "kind": "text-pack",
+      "source_file": "fixtures/release-migration.md",
+      "query": "prepare the database migration evidence",
+      "budget_tokens": 70,
+      "protected": ["v2.4.1", "2026-09-01", "python migrate.py --target v2.4.1"],
+      "expected_anchors": ["Back up the database", "Confirm schema version"]
+    },
+    {
+      "id": "code-safety-pass-through",
+      "kind": "text-pack",
+      "source_file": "fixtures/high-risk-code.py",
+      "query": "review the deployment code",
+      "budget_tokens": 20,
+      "safety_class": "code",
+      "expect_budget_conflict": true,
+      "protected": ["v8.1.0", "https://api.example.com/v1", "DEPLOY_ERR_81"],
+      "expected_anchors": ["def deploy"]
+    },
+    {
+      "id": "table-safety-pass-through",
+      "kind": "text-pack",
+      "source_file": "fixtures/high-risk-table.csv",
+      "query": "summarize totals",
+      "budget_tokens": 20,
+      "safety_class": "table",
+      "expect_budget_conflict": true,
+      "protected": ["INV-4401", "188000.50", "2026-12-20"]
+    },
+    {
+      "id": "model-retrieval-compression",
+      "kind": "model-pack",
+      "source_file": "fixtures/long-redundant-brief.md",
+      "query": "database migration rollback evidence",
+      "budget_tokens": 85,
+      "protected": ["v5.8.0", "2026-11-15", "python db_migrate.py --release v5.8.0", "MIGRATION_OK_58"],
+      "expected_anchors": ["rollback"]
+    },
+    {
+      "id": "office-docx",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/office.docx",
+      "expected_route": "markitdown",
+      "protected": ["v9.4.0", "2026-12-21", "188000.50", "APPROVED_TIKAZ_94"],
+      "expected_anchors": ["TIKAZ Token Forge Office Acceptance"],
+      "table_cells": ["OFFICE-940", "188000.50", "APPROVED_TIKAZ_94"]
+    },
+    {
+      "id": "office-pptx",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/slides.pptx",
+      "expected_route": "markitdown",
+      "protected": ["v9.4.0", "2026-12-21", "python release.py --version v9.4.0"],
+      "expected_anchors": ["PPT_ANCHOR_940", "Safety Gate"]
+    },
+    {
+      "id": "office-xlsx",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/table.xlsx",
+      "expected_route": "markitdown",
+      "protected": ["XLSX-9401", "188000.50", "2026-12-21"],
+      "table_cells": ["XLSX-9401", "188000.50", "2026-12-21", "XLSX-9402", "42000.25", "2027-01-10"]
+    },
+    {
+      "id": "pdf-born-digital",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/born-digital.pdf",
+      "expected_route": "markitdown",
+      "protected": ["v9.4.0", "2026-12-21", "python migrate.py --target v9.4.0"],
+      "expected_anchors": ["PDF_ANCHOR_940"]
+    },
+    {
+      "id": "ocr-image",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/scan.png",
+      "reference_file": "acceptance-fixtures/scan-reference.txt",
+      "max_character_error_rate": 0.03,
+      "expected_route": "mineru",
+      "protected": ["OCR_ANCHOR_940", "v9.4.0", "2026-12-21", "188000.50"]
+    },
+    {
+      "id": "ocr-scanned-pdf",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/scan.pdf",
+      "reference_file": "acceptance-fixtures/scan-reference.txt",
+      "max_character_error_rate": 0.03,
+      "expected_route": "mineru",
+      "protected": ["OCR_ANCHOR_940", "v9.4.0", "2026-12-21", "188000.50"]
+    },
+    {
+      "id": "dynamic-web-local",
+      "kind": "web-local",
+      "source_file": "acceptance-fixtures/dynamic-page.html",
+      "protected": ["WEB_ANCHOR_940", "v9.4.0", "2026-12-21"],
+      "expected_anchors": ["TIKAZ Dynamic Web"]
+    },
+    {
+      "id": "audio-transcription",
+      "kind": "media",
+      "source_file": "acceptance-fixtures/speech.wav",
+      "language": "en",
+      "transcript_reference_file": "acceptance-fixtures/speech-reference.txt",
+      "max_word_error_rate": 0.35,
+      "transcript_facts": ["Token Forge benchmark", "release version", "verification date"],
+      "minimum_keyframes": 0
+    },
+    {
+      "id": "video-transcription-scenes",
+      "kind": "media",
+      "source_file": "acceptance-fixtures/speech-video.mp4",
+      "language": "en",
+      "transcript_reference_file": "acceptance-fixtures/speech-reference.txt",
+      "max_word_error_rate": 0.35,
+      "transcript_facts": ["Token Forge benchmark", "release version", "verification date"],
+      "minimum_keyframes": 2
+    },
+    {
+      "id": "ebook-epub",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/ebook.epub",
+      "required": false,
+      "expected_route": "markitdown",
+      "protected": ["EPUB_ANCHOR_940", "v9.4.0"]
+    },
+    {
+      "id": "email-eml-capability",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/message.eml",
+      "required": false,
+      "protected": ["EMAIL_ANCHOR_940", "v9.4.0"]
+    },
+    {
+      "id": "archive-zip-capability",
+      "kind": "conversion",
+      "source_file": "acceptance-fixtures/archive.zip",
+      "required": false,
+      "protected": ["ARCHIVE_ANCHOR_940", "v9.4.0"]
+    },
+    {
+      "id": "public-platform-metadata",
+      "kind": "platform-media",
+      "url": "https://www.bilibili.com/video/BV1TU3g66Exd",
+      "required": false
+    }
+  ]
+}

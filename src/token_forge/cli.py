@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .adapters import probe_all
+from .acceptance import run_acceptance_manifest
 from .benchmark import run_manifest, run_model_manifest
 from .config import LocalConfig, load_config
 from .conversion import convert_source
@@ -88,6 +89,16 @@ def _parser() -> argparse.ArgumentParser:
     model_benchmark.add_argument("--manifest", required=True, type=Path)
     model_benchmark.add_argument("--output", required=True, type=Path)
     model_benchmark.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    acceptance = sub.add_parser(
+        "benchmark-acceptance", help="Run the versioned full-scenario local acceptance suite"
+    )
+    acceptance.add_argument("--manifest", required=True, type=Path)
+    acceptance.add_argument("--output", required=True, type=Path)
+    acceptance.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    acceptance.add_argument(
+        "--allow-network", action="store_true",
+        help="Enable explicitly declared public network cases; never enables remote inference",
+    )
     return parser
 
 
@@ -270,4 +281,11 @@ def main(argv: list[str] | None = None) -> int:
         result = run_model_manifest(args.manifest, args.output, config.adapters)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["all_protected_pass"] else 2
+    if args.command == "benchmark-acceptance":
+        config = load_config(args.config)
+        result = run_acceptance_manifest(
+            args.manifest, args.output, config.adapters, allow_network=args.allow_network
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result["all_required_pass"] else 2
     return 1

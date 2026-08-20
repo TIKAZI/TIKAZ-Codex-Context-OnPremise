@@ -4,21 +4,27 @@
 
 | Adapter | Installed version | Command/import smoke | Model/quality gate |
 |---|---:|---|---|
-| MarkItDown | 0.1.7 | HTML fallback and PDF conversion passed | PDF/Office source-literal gate pending |
+| MarkItDown | 0.1.7 | DOCX, PPTX, XLSX, EPUB, HTML fallback, and born-digital PDF passed | binary PDF remains output-only without an independent source extractor |
 | Docling | 2.120.1 | command/version passed; PDF smoke timed out while fetching layout model | disabled without local artifacts; remote fetch requires explicit opt-in |
 | MinerU | 3.4.5 | local `pipeline + ocr` route passed one fixed clear scan | degraded, rotated, table, figure, and real-document gates pending |
 | PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | CLI exposes Office `doc2md` and cloud API | installed CLI is not a local scanned-PDF OCR route |
-| Defuddle | 0.19.2 | primary CLI adapter passed on fixed local HTML | dynamic-page gate pending |
+| Defuddle | 0.19.2 | static HTML and Playwright-rendered dynamic-page fixtures passed | arbitrary/authenticated sites pending |
 | Playwright | 1.62.1 + Chromium 1234 local assets | dynamic-page render + Defuddle smoke passed | authenticated/private pages and broader dynamic fixtures pending |
 | yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
 | PySceneDetect | 0.7.1 | real local video produced 7 scenes and 21 keyframes | broader codec/transition fixtures pending |
-| faster-whisper | existing large-v3 | local CUDA DLL discovery repaired; full 14.23-second media route passed in 5.486 seconds | broader WER/language fixtures pending |
+| faster-whisper | existing large-v3 | CUDA media route and generated English audio/video WER fixtures passed | multilingual, noisy, and long-form WER fixtures pending |
 | FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | BGE-M3 and BGE reranker loaded fully offline | fixed retrieval/reranking fixtures passed |
 | LLMLingua | 0.2.2 | local XLM-RoBERTa model loaded and compressed prose offline | fixed low-risk compression fixtures passed |
 
 ## Model download boundary
 
 The three approved local models are complete on G: and passed offline loading. BGE-M3 produced 1024-dimensional normalized embeddings; on the checked smoke, migration evidence scored `0.8559` against the migration query and unrelated design background scored `0.3751`. The BGE reranker scored the related pair `0.1691` and the unrelated pair `0.0000229`. These two-pair checks establish loading and ordering direction only, not general retrieval quality.
+
+## Full-scenario acceptance gate
+
+The versioned v1 manifest ran 17 real-adapter cases. All 13 required local routes passed. Required-case denominators were 37 protected facts, 9 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Four comparable text cases averaged `30.49%` deterministic estimated-token reduction, including two intentional 0% high-risk pass-through cases.
+
+The complete manifest also keeps EML and ZIP as unsupported failures and the opt-in public-platform case as `Pending`. See `docs/BENCHMARK.md` and `benchmarks/results/acceptance-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, visual understanding, authenticated-site support, or multilingual/noisy ASR quality.
 
 ## Verified conversion slice
 

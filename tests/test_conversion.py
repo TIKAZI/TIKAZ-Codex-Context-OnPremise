@@ -67,6 +67,61 @@ class ProcessRunnerTests(unittest.TestCase):
 
 
 class ConversionTests(unittest.TestCase):
+    def test_output_only_ocr_unescapes_identifier_underscores(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "scan.png"
+            source.write_bytes(b"image-placeholder")
+            config = root / "mineru.json"
+            config.write_text("{}", encoding="utf-8")
+
+            def runner(command: Sequence[str], timeout: int) -> ProcessOutcome:
+                if "--version" in command:
+                    return ProcessOutcome(0, "mineru 3.4.5", "")
+                destination = Path(command[command.index("-o") + 1])
+                nested = destination / "scan" / "ocr"
+                nested.mkdir(parents=True)
+                (nested / "scan.md").write_text("OCR\\_ANCHOR\\_940", encoding="utf-8")
+                return ProcessOutcome(0, "", "")
+
+            result = convert_source(
+                source,
+                root / "output",
+                {"mineru": "mineru.exe", "mineru_config": str(config)},
+                runner=runner,
+            )
+
+            self.assertTrue(result.success)
+            self.assertEqual(
+                (root / "output" / "canonical.md").read_text(encoding="utf-8"),
+                "OCR_ANCHOR_940",
+            )
+
+    def test_restores_markdown_escaped_protected_identifier(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "article.html"
+            source.write_text("<main>WEB_ANCHOR_940</main>", encoding="utf-8")
+            output = root / "output"
+
+            def runner(command: Sequence[str], timeout: int) -> ProcessOutcome:
+                if "--version" in command:
+                    return ProcessOutcome(0, "defuddle 0.19.2", "")
+                destination = Path(command[command.index("--output") + 1])
+                destination.write_text("WEB\\_ANCHOR\\_940", encoding="utf-8")
+                return ProcessOutcome(0, "", "")
+
+            result = convert_source(
+                source,
+                output,
+                {"defuddle": "defuddle.cmd"},
+                runner=runner,
+            )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.protected_recall, 1.0)
+            self.assertEqual((output / "canonical.md").read_text(encoding="utf-8"), "WEB_ANCHOR_940")
+
     def test_scanned_pdf_reports_needs_ocr_when_no_local_ocr_adapter_is_ready(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
