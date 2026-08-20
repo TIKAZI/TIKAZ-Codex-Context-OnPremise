@@ -5,11 +5,12 @@ import json
 import re
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from .cost import estimate_tokens
 from .models import PackResult
 from .protection import extract_protected_literals, protected_recall
+from .specialized import build_python_context, build_table_context
 
 
 def _blocks(text: str) -> list[str]:
@@ -102,6 +103,7 @@ def build_text_pack(
     cache_dir: Path | None = None,
     adapter: str = "text-pack",
     adapter_version: str = "1",
+    required_literals: Sequence[str] = (),
 ) -> PackResult:
     if budget_tokens <= 0:
         raise ValueError("budget_tokens must be positive")
@@ -111,6 +113,7 @@ def build_text_pack(
         "query": query,
         "budget_tokens": budget_tokens,
         "safety_class": safety_class,
+        "required_literals": tuple(required_literals),
     }
     cache_key = _cache_key(source_hash, adapter, adapter_version, effective_config)
     if cache_dir is not None:
@@ -121,7 +124,30 @@ def build_text_pack(
             return cached
 
     input_tokens = estimate_tokens(source)
-    protected = extract_protected_literals(source)
+    protected = tuple(dict.fromkeys((*extract_protected_literals(source), *required_literals)))
+
+    if safety_class == "code":
+        specialized = build_python_context(
+            source, query, budget_tokens, protected, source_hash, cache_key
+        )
+        if specialized is not None:
+            if cache_dir is not None:
+                _write_cache(cache_dir, specialized)
+            if output_dir is not None:
+                _write_result(output_dir, specialized)
+            return specialized
+
+    if safety_class == "table":
+        table_protected = tuple(required_literals)
+        specialized = build_table_context(
+            source, query, budget_tokens, table_protected, source_hash, cache_key
+        )
+        if specialized is not None:
+            if cache_dir is not None:
+                _write_cache(cache_dir, specialized)
+            if output_dir is not None:
+                _write_result(output_dir, specialized)
+            return specialized
 
     if safety_class in {"code", "contract", "table", "financial", "command", "security"}:
         result = PackResult(
@@ -165,12 +191,26 @@ def build_text_pack(
     query_terms = _query_terms(query)
 
     mandatory: list[tuple[int, str]] = []
-    candidates: list[tuple[int, str]] = []
-    for item in unique_blocks:
-        if any(value in item[1] for value in protected):
-            mandatory.append(item)
-        else:
-            candidates.append(item)
+    uncovered = set(protected)
+    remaining = list(unique_blocks)
+    while uncovered:
+        choices = [
+            (item, {value for value in uncovered if value in item[1]})
+            for item in remaining
+        ]
+        choices = [(item, covered) for item, covered in choices if covered]
+        if not choices:
+            break
+        item, covered = max(
+            choices,
+            key=lambda choice: (
+                len(choice[1]), _score(choice[0][1], query_terms), -estimate_tokens(choice[0][1]),
+            ),
+        )
+        mandatory.append(item)
+        remaining.remove(item)
+        uncovered.difference_update(covered)
+    candidates = remaining
 
     selected = list(mandatory)
     selected_ids = {index for index, _ in selected}

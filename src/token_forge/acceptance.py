@@ -71,14 +71,16 @@ def _text_case(case: dict[str, Any], manifest_dir: Path) -> dict[str, Any]:
     source_path = (manifest_dir / str(case["source_file"])).resolve()
     source = source_path.read_text(encoding="utf-8")
     started = time.perf_counter()
+    protected = tuple(str(value) for value in case.get("protected", ()))
+    anchors = tuple(str(value) for value in case.get("expected_anchors", ()))
+    safety_class = str(case.get("safety_class", "text"))
     result = build_text_pack(
         source,
         str(case["query"]),
         int(case["budget_tokens"]),
-        safety_class=str(case.get("safety_class", "text")),
+        safety_class=safety_class,
+        required_literals=(*protected, *anchors),
     )
-    protected = tuple(str(value) for value in case.get("protected", ()))
-    anchors = tuple(str(value) for value in case.get("expected_anchors", ()))
     protected_recall = _literal_recall(protected, result.text)
     anchor_recall = _literal_recall(anchors, result.text)
     budget_compliant = result.final_tokens <= int(case["budget_tokens"]) and not result.budget_conflict
@@ -104,6 +106,10 @@ def _text_case(case: dict[str, Any], manifest_dir: Path) -> dict[str, Any]:
         "anchor_recall": anchor_recall,
         "anchor_count": len(anchors),
         "route": result.mode,
+        "optimization_profile": {
+            "code": "code-context", "table": "table-context"
+        }.get(safety_class, "text-context"),
+        "route_evidence": result.evidence,
         "runtime_ms": round((time.perf_counter() - started) * 1000),
         "failure_reason": "" if passed else "budget or declared fidelity gate failed",
     }
@@ -194,6 +200,7 @@ def _model_case(
     return {
         "id": str(case["id"]), "kind": "model-pack", "required": bool(case.get("required", True)),
         "status": "passed" if passed else "failed", "route": result.mode,
+        "optimization_profile": "model-text-context",
         "source_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
         "input_bytes": source_path.stat().st_size,
         "input_tokens_estimated": result.input_tokens,
@@ -363,6 +370,34 @@ def _aggregate(cases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
     measured_efficiency = [
         case for case in cases if case.get("token_reduction_ratio") is not None
     ]
+    comparable_tokens = [
+        case for case in measured_efficiency
+        if case.get("input_tokens_estimated") is not None
+        and case.get("output_tokens_estimated") is not None
+    ]
+    profiles: dict[str, dict[str, Any]] = {}
+    for profile in sorted({str(case.get("optimization_profile", "unclassified")) for case in measured_efficiency}):
+        selected = [
+            case for case in measured_efficiency
+            if str(case.get("optimization_profile", "unclassified")) == profile
+        ]
+        selected_tokens = [
+            case for case in selected
+            if case.get("input_tokens_estimated") is not None
+            and case.get("output_tokens_estimated") is not None
+        ]
+        total_input = sum(int(case["input_tokens_estimated"]) for case in selected_tokens)
+        total_output = sum(int(case["output_tokens_estimated"]) for case in selected_tokens)
+        profiles[profile] = {
+            "case_count": len(selected),
+            "mean_token_reduction_ratio": (
+                sum(float(case["token_reduction_ratio"]) for case in selected) / len(selected)
+                if selected else None
+            ),
+            "weighted_token_reduction_ratio": (
+                1 - total_output / total_input if total_input else None
+            ),
+        }
     fidelity = {
         "protected_fact_cases": protected_case_count,
         "protected_fact_denominator": protected_denominator,
@@ -386,6 +421,13 @@ def _aggregate(cases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
             / len(measured_efficiency)
             if measured_efficiency else None
         ),
+        "weighted_token_reduction_ratio": (
+            1 - sum(int(case["output_tokens_estimated"]) for case in comparable_tokens)
+            / sum(int(case["input_tokens_estimated"]) for case in comparable_tokens)
+            if comparable_tokens and sum(int(case["input_tokens_estimated"]) for case in comparable_tokens)
+            else None
+        ),
+        "profiles": profiles,
         "measurement": "deterministic token estimate; not provider telemetry",
     }
     multimodal = {
@@ -405,6 +447,8 @@ def _aggregate(cases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
 
 
 def _evidence_card(summary: dict[str, Any], cases: list[dict[str, Any]]) -> str:
+    efficiency = summary.get("efficiency", {})
+    weighted = efficiency.get("weighted_token_reduction_ratio")
     lines = [
         f"# Acceptance evidence: {summary['suite_id']}",
         "",
@@ -415,11 +459,29 @@ def _evidence_card(summary: dict[str, Any], cases: list[dict[str, Any]]) -> str:
         f"- Failed: {summary['status_counts']['failed']}",
         f"- Pending: {summary['status_counts']['pending']}",
         f"- Required gate: {'PASS' if summary['all_required_pass'] else 'FAIL'}",
+        f"- Weighted context reduction: {'Pending' if weighted is None else f'{float(weighted):.2%}'}",
         "- Provider token telemetry: Pending",
-        "",
+    ]
+    profiles = efficiency.get("profiles", {})
+    if profiles:
+        lines.extend([
+            "", "## Efficiency profiles", "",
+            "| Profile | Cases | Macro mean | Token-weighted reduction |",
+            "|---|---:|---:|---:|",
+        ])
+        for name, profile in profiles.items():
+            mean = profile.get("mean_token_reduction_ratio")
+            profile_weighted = profile.get("weighted_token_reduction_ratio")
+            lines.append(
+                f"| {name} | {profile.get('case_count', 0)} | "
+                f"{'N/A' if mean is None else f'{float(mean):.2%}'} | "
+                f"{'N/A' if profile_weighted is None else f'{float(profile_weighted):.2%}'} |"
+            )
+    lines.extend([
+        "", "## Cases", "",
         "| Case | Kind | Status | Token reduction | Protected recall | Anchor recall | Runtime |",
         "|---|---|---:|---:|---:|---:|---:|",
-    ]
+    ])
     for case in cases:
         reduction = case.get("token_reduction_ratio")
         protected = case.get("protected_fact_recall")

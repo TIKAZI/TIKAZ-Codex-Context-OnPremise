@@ -7,6 +7,27 @@ from token_forge.model_pipeline import optimize_text_pack
 
 
 class ModelPipelineTests(unittest.TestCase):
+    def test_high_risk_python_uses_deterministic_ast_route_without_model_helpers(self):
+        filler = "\n\n".join(
+            f"def unrelated_{index}():\n    return 'noise'" for index in range(50)
+        )
+        source = f'''API_URL = "https://api.example.com/v1"
+
+def deploy(client):
+    return client.post(API_URL)
+
+{filler}
+'''
+        result = optimize_text_pack(
+            source,
+            "review deployment",
+            100,
+            adapters={},
+            safety_class="code",
+        )
+        self.assertEqual(result.mode, "code-sliced")
+        self.assertEqual(result.evidence["selection_method"], "python-ast-dependency-closure")
+
     def setUp(self) -> None:
         self.adapters = {
             "retrieval_python": "G:/envs/retrieval/python.exe",

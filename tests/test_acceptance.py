@@ -5,10 +5,36 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from token_forge.acceptance import run_acceptance_manifest
+from token_forge.acceptance import _aggregate, run_acceptance_manifest
 
 
 class AcceptanceBenchmarkTests(unittest.TestCase):
+    def test_efficiency_is_reported_by_profile_and_as_weighted_context(self):
+        cases = [
+            {
+                "status": "passed", "optimization_profile": "code-context",
+                "token_reduction_ratio": 0.8, "input_tokens_estimated": 100,
+                "output_tokens_estimated": 20, "protected_fact_count": 0,
+                "anchor_count": 0,
+            },
+            {
+                "status": "passed", "optimization_profile": "table-context",
+                "token_reduction_ratio": 0.0, "input_tokens_estimated": 10,
+                "output_tokens_estimated": 10, "protected_fact_count": 0,
+                "anchor_count": 0,
+            },
+        ]
+        _, metrics = _aggregate(cases)
+        self.assertAlmostEqual(metrics["efficiency"]["weighted_token_reduction_ratio"], 80 / 110)
+        self.assertEqual(
+            metrics["efficiency"]["profiles"]["code-context"]["mean_token_reduction_ratio"],
+            0.8,
+        )
+        self.assertEqual(
+            metrics["efficiency"]["profiles"]["table-context"]["mean_token_reduction_ratio"],
+            0.0,
+        )
+
     def test_platform_case_runs_only_when_network_is_explicitly_enabled(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

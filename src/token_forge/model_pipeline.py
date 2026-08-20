@@ -30,6 +30,7 @@ class ModelPackResult:
     chunk_ids: tuple[str, ...] = field(default_factory=tuple)
     fallback_reason: str = ""
     budget_conflict: bool = False
+    evidence: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -68,7 +69,11 @@ def _run_helper(python: str, script: Path, payload: dict[str, object], timeout: 
 
 def _fallback(source: str, query: str, budget: int, safety_class: str, reason: str) -> ModelPackResult:
     result = build_text_pack(source, query, budget, safety_class=safety_class)
-    mode = result.mode if result.mode == "safety-pass-through" else "deterministic-fallback"
+    mode = (
+        result.mode
+        if result.mode in {"safety-pass-through", "code-sliced", "table-aggregated"}
+        else "deterministic-fallback"
+    )
     return ModelPackResult(
         text=result.text,
         mode=mode,
@@ -80,6 +85,7 @@ def _fallback(source: str, query: str, budget: int, safety_class: str, reason: s
         source_hash=result.source_hash,
         fallback_reason=reason,
         budget_conflict=result.budget_conflict,
+        evidence=result.evidence,
     )
 
 

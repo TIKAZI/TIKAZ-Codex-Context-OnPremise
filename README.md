@@ -66,7 +66,9 @@ Adapter processes run in isolated process groups. On Windows they are attached t
 
 ## Verified acceptance status
 
-The checked full-scenario v1 suite passed all **15 / 15 required scenarios** through real local routes. Across required cases it recovered **41 / 41 protected facts**, **9 / 9 expected anchors**, and **9 / 9 table cells**; across all local cases protected-fact recall was **43 / 43**. Two controlled OCR fixtures measured **0.00% mean CER**, while generated English audio/video measured **5.88% mean WER** with **6 / 6 transcript facts** recovered. The full manifest passed **16 / 16 local cases**; only the opt-in public-platform network case remains `Pending`. EML uses the standard-library email parser, while ZIP is read in place through bounded inventory/text extraction without writing archive members to disk.
+The checked full-scenario v1 suite passed all **18 / 18 required scenarios** and **19 / 19 local cases**. Across required cases it recovered **51 / 51 protected facts**, **11 / 11 expected anchors**, and **9 / 9 table cells**; across all local cases protected-fact recall was **53 / 53**. Seven context cases measured **89.57% token-weighted reduction** and **55.96% macro mean**, keeping the two intentional small-input safety pass-throughs visible. The fixed scale fixtures measured **81.53%** for deterministic long text, **91.05%** for an exact Python AST dependency slice, and **97.15%** for a reconciled 500-row CSV aggregate. These are deterministic estimates on generated fixtures, not provider telemetry or universal savings.
+
+Two controlled OCR fixtures measured **0.00% mean CER**, while generated English audio/video measured **5.88% mean WER** with **6 / 6 transcript facts** recovered. Only the opt-in public-platform network case remains `Pending`. EML uses the standard-library email parser, while ZIP is read in place through bounded inventory/text extraction without writing archive members to disk.
 
 See the [full benchmark method and claim boundaries](docs/BENCHMARK.md), [中文说明](docs/BENCHMARK.zh-CN.md), and [raw checked results](benchmarks/results/acceptance-v1). These fixture-specific measurements are not universal accuracy, provider telemetry, or a promise of the same reduction on other material.
 
@@ -77,7 +79,7 @@ The fixed seven-case benchmark currently reports:
 | Case | Route | Estimated input → final | Estimated reduction | Declared evidence recall |
 |---|---|---:|---:|---:|
 | Long redundant brief | Retrieved | 509 → 82 | 83.89% | 1.00 |
-| Release migration | Retrieved | 106 → 65 | 38.68% | 1.00 |
+| Release migration | Retrieved | 106 → 53 | 50.00% | 1.00 |
 | Short dense error | Pass-through | 22 → 22 | 0% | 1.00 |
 | Budget conflict | Source fallback | 35 → 35 | 0% | 1.00 |
 | Code / contract / table | Safety pass-through | unchanged | 0% | 1.00 |

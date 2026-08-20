@@ -9,6 +9,23 @@ from token_forge.benchmark import run_case, run_model_manifest
 
 
 class BenchmarkTests(unittest.TestCase):
+    def test_declared_facts_are_selection_requirements_not_only_posthoc_scores(self):
+        case = {
+            "id": "declared-anchor",
+            "source": (
+                "# Database\nMigration steps are ready.\n\n# Audit\nKeep audit trace\n\n"
+                + "\n\n".join(
+                    f"# Decoration {label}\nCampaign filler words for {label}."
+                    for label in ("alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel")
+                )
+            ),
+            "query": "database migration",
+            "budget_tokens": 32,
+            "protected": ["Keep audit trace"],
+        }
+        result = run_case(case)
+        self.assertEqual(result["protected_recall"], 1.0)
+
     def test_reports_efficiency_and_fidelity_separately(self):
         case = {
             "id": "release",

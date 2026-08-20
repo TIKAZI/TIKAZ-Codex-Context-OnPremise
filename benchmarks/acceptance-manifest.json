@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "suite_id": "tikaz-token-forge-full-scenario-v1",
-  "notes": "Public, generated fixtures exercise real local adapters. Provider telemetry and visual understanding remain separate Pending evidence.",
+  "notes": "Public, generated fixtures exercise real local adapters plus scale-aware text, Python AST, and CSV routes. Provider telemetry and visual understanding remain separate Pending evidence.",
   "cases": [
     {
       "id": "text-release-pack",
@@ -41,6 +41,34 @@
       "budget_tokens": 85,
       "protected": ["v5.8.0", "2026-11-15", "python db_migrate.py --release v5.8.0", "MIGRATION_OK_58"],
       "expected_anchors": ["rollback"]
+    },
+    {
+      "id": "text-long-deterministic",
+      "kind": "text-pack",
+      "source_file": "fixtures/long-redundant-brief.md",
+      "query": "database migration rollback evidence",
+      "budget_tokens": 100,
+      "protected": ["v5.8.0", "2026-11-15", "python db_migrate.py --release v5.8.0", "MIGRATION_OK_58"],
+      "expected_anchors": ["restore from the pre-migration backup"]
+    },
+    {
+      "id": "code-large-ast-slice",
+      "kind": "text-pack",
+      "source_file": "fixtures/large-code-context.py",
+      "query": "review the deployment code",
+      "budget_tokens": 180,
+      "safety_class": "code",
+      "protected": ["v8.1.0", "https://api.example.com/v1", "DEPLOY_ERR_81"],
+      "expected_anchors": ["def deploy"]
+    },
+    {
+      "id": "table-large-reconciled-aggregate",
+      "kind": "text-pack",
+      "source_file": "fixtures/large-table-context.csv",
+      "query": "summarize amount by status",
+      "budget_tokens": 160,
+      "safety_class": "table",
+      "protected": ["5000.00", "approved", "pending"]
     },
     {
       "id": "office-docx",

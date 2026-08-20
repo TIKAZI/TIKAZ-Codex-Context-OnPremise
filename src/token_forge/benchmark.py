@@ -13,13 +13,14 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
     source = str(case["source"])
     safety_class = str(case.get("safety_class", "text"))
     high_risk = safety_class in {"code", "contract", "table", "financial", "command", "security"}
+    declared = tuple(str(value) for value in case.get("protected", ()))
     result = build_text_pack(
         source,
         str(case["query"]),
         int(case["budget_tokens"]),
         safety_class=safety_class,
+        required_literals=declared,
     )
-    declared = tuple(str(value) for value in case.get("protected", ()))
     declared_recall = 1.0 if not declared else sum(value in result.text for value in declared) / len(declared)
     input_tokens = estimate_tokens(source)
     canonical = canonicalize_text(source)

@@ -22,7 +22,9 @@ The three approved local models are complete on G: and passed offline loading. B
 
 ## Full-scenario acceptance gate
 
-The versioned v1 manifest ran 17 cases. All 15 required local routes passed, and the complete local set passed 16/16. Required-case denominators were 41 protected facts, 9 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Four comparable text cases averaged `30.49%` deterministic estimated-token reduction, including two intentional 0% high-risk pass-through cases.
+The versioned v1 manifest ran 20 cases. All 18 required local routes passed, and the complete local set passed 19/19. Required-case denominators were 51 protected facts, 11 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Seven comparable context cases measured `89.57%` token-weighted reduction and `55.96%` macro mean, with both intentional small-input 0% pass-throughs retained.
+
+The generated scale fixtures measured `81.53%` deterministic long-text reduction, `91.05%` exact Python AST slicing, and `97.15%` reconciled CSV aggregation. Their profile-weighted results, including the small 0% cases, were `74.15%`, `84.19%`, and `96.00%` respectively. These are fixture-specific deterministic estimates, not universal savings.
 
 EML and bounded ZIP now pass their declared local source-literal gates. The opt-in public-platform case remains `Pending`. See `docs/BENCHMARK.md` and `benchmarks/results/acceptance-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, visual understanding, authenticated-site support, or multilingual/noisy ASR quality.
 

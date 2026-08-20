@@ -23,6 +23,7 @@ Designed, integrated, independently implemented, and continuously maintained by 
 - Use fast extraction for simple born-digital documents and escalate to layout/OCR/VLM adapters only when quality gates fail.
 - Prefer platform subtitles, then the configured local faster-whisper environment for speech.
 - Keep code, commands, logs, contracts, financial data, tables, and security evidence out of learned prose compression.
+- For Python, prefer an exact AST name-dependency slice when it preserves declared facts, decorators, dependencies, syntax, and budget; otherwise return the source. For CSV aggregation, include every parsed row in the reconciliation gate and retain the original table as evidence.
 - Use lexical plus semantic retrieval; enable a reranker only after it passes a domain-specific fixture.
 - Serialize large GPU stages unless the host has measured headroom.
 
@@ -43,6 +44,8 @@ For bounded text context, use `optimize` only after `doctor.model_gates` reports
 For release evidence, run `benchmark-acceptance` with the versioned manifest. Publish `summary.json`, `metrics.json`, `cases.json`, and `evidence-card.md` together. Keep required-case metrics separate from the full manifest, retain optional failures, and leave provider telemetry, public-platform state, and visual understanding as `Pending` unless independently measured.
 
 Treat OCR metrics as fixture-specific. The repository's clear bilingual scan is a smoke gate, not permission to claim universal CER, accuracy, latency, or token savings. Keep scanned-PDF results at `output-only` unless a separate source-derived verification path exists.
+
+Treat code/table scale metrics as fixture-specific too. Python AST compilation does not prove runtime equivalence, and a reconciled CSV aggregate does not prove that a free-form question was interpreted correctly. Preserve the original source and expose the selected symbols, row count, columns, and reconciliation state in the ledger.
 
 ## Completion gate
 

@@ -17,8 +17,8 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 | Audio | MP3, WAV, M4A, AAC, FLAC, OGG, OPUS | existing faster-whisper | platform transcript or source |
 | Video | MP4, MKV, MOV, WebM, AVI, M4V, TS, MTS | FFmpeg + faster-whisper | keyframes + OCR/vision |
 | Platforms | URLs supported by configured platform tools | official/platform subtitles first | yt-dlp or existing platform-specific workflow |
-| Code and logs | repositories and common source/config/log formats | ripgrep + structural selection | source snippets; never learned compression |
-| Tables and finance | CSV, TSV, spreadsheets and extracted tables | structure-preserving selection | source table; never learned compression |
+| Code and logs | Python plus common source/config/log formats | exact Python AST dependency slice; ripgrep selection elsewhere | source snippets; never learned compression |
+| Tables and finance | CSV, TSV, spreadsheets and extracted tables | bounded CSV schema-aware aggregate with reconciliation | source table; never learned compression |
 
 ## Explicit non-universal cases
 
@@ -29,6 +29,8 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 - layouts whose reading order, formulas, or table structure cannot be verified.
 
 These cases must fail visibly or retain the source. They must never be represented as successfully compressed.
+
+Python AST slicing is capped at 16 MiB and 200,000 lines; it preserves exact source spans, decorators, `__future__` imports, and selected name dependencies, then compiles the resulting slice. Dynamic imports, runtime registration, reflection, generated code, and cross-language call graphs are outside this gate and must fall back to source selection. CSV aggregation is capped at 64 MiB, 100,000 data rows, 256 columns, and 1 MiB per cell; categorical values are Markdown-escaped and numeric columns must reconcile across every parsed row.
 
 The v1 acceptance manifest verifies native EML and bounded ZIP routes. ZIP members are never written to disk by this route; unsafe paths, symlinks, encrypted entries, more than 256 entries, entries over 16 MiB, totals over 64 MiB, and compression ratios over 100:1 fail closed. Nested archives are listed but never recursively opened.
 

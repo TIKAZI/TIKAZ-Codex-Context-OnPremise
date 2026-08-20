@@ -29,6 +29,7 @@ class PackResult:
     budget_conflict: bool = False
     cache_key: str = ""
     cache_hit: bool = False
+    evidence: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
