@@ -3,10 +3,22 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from token_forge.model_pipeline import optimize_text_pack
+from token_forge.model_pipeline import optimize_text_pack, rank_local_chunks
 
 
 class ModelPipelineTests(unittest.TestCase):
+    def test_local_ranker_returns_validated_hybrid_order(self):
+        chunks = [
+            {"id": "a", "index": 0, "text": "decorative launch copy"},
+            {"id": "b", "index": 1, "text": "database rollback evidence"},
+        ]
+        with patch("token_forge.model_pipeline._run_helper", return_value={"ranked": [
+            {"id": "b", "index": 1, "rerank_score": 4.0},
+            {"id": "a", "index": 0, "rerank_score": 1.0},
+        ]}):
+            ranked = rank_local_chunks(chunks, "database rollback", self.adapters)
+        self.assertEqual(ranked[0]["id"], "b")
+        self.assertEqual(ranked[0]["strategy"], "hybrid-rrf-mmr")
     def test_high_risk_python_uses_deterministic_ast_route_without_model_helpers(self):
         filler = "\n\n".join(
             f"def unrelated_{index}():\n    return 'noise'" for index in range(50)
@@ -57,7 +69,7 @@ def deploy(client):
 
         def fake_helper(_python, script, payload, _timeout):
             if script.name == "retrieve_local.py":
-                chunks = payload["chunks"]
+                chunks = payload.get("chunks") or payload["requests"][0]["chunks"]
                 return {
                     "ranked": [
                         {"id": chunks[2]["id"], "index": 2, "dense_score": 0.8, "rerank_score": 4.2},
@@ -78,6 +90,8 @@ def deploy(client):
             self.assertIn("python migrate.py --target v2.4.1", first.text)
             self.assertEqual(first.protected_recall, 1.0)
             self.assertTrue((Path(temp) / "model-ledger.json").is_file())
+            self.assertIn("query_coverage", first.evidence)
+            self.assertEqual(first.evidence["retrieval_strategy"], "hybrid-rrf-mmr")
 
     def test_learned_compression_never_receives_protected_blocks(self) -> None:
         source = (
@@ -90,7 +104,8 @@ def deploy(client):
 
         def fake_helper(_python, script, payload, _timeout):
             if script.name == "retrieve_local.py":
-                return {"ranked": payload["chunks"]}
+                chunks = payload.get("chunks") or payload["requests"][0]["chunks"]
+                return {"ranked": chunks}
             compression_payloads.append(payload)
             return {"compressed_prompt": "Migration rollback steps for maintainers."}
 

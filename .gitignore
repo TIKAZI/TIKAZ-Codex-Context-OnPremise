@@ -3,9 +3,16 @@ __pycache__/
 .venv/
 .pytest_cache/
 .coverage
+.mypy_cache/
+.ruff_cache/
 dist/
 build/
 *.egg-info/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
 .token-forge/
 .token-forge.local.toml
 benchmark-results/

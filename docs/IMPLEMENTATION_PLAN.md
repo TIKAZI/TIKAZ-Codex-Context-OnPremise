@@ -31,9 +31,12 @@ Checkpoint: each adapter passes one fixed fixture before it is eligible for rout
 ## Phase 3: retrieval and learned compression
 
 - [x] Keep deterministic lexical retrieval and bounded selection as the no-model baseline.
-- [ ] Add dense indexes with deterministic chunk identifiers.
-- [ ] Evaluate BGE-M3 and candidate rerankers on personal fixtures.
-- [ ] Add LLMLingua-2 behind an eligibility and quality gate.
+- [x] Add dense retrieval with deterministic chunk identifiers.
+- [x] Evaluate BGE-M3 and BGE reranking on fixed offline fixtures.
+- [x] Add LLMLingua-2 behind eligibility, protected-fact, and budget gates.
+- [x] Add bilingual intent facets, lexical/semantic signal routing, diversity selection, and explicit insufficient-evidence fallback.
+- [x] Add a 14-case labeled retrieval benchmark with Recall@K, Precision@K, MRR, nDCG@K, raw cases, and per-mode gates.
+- [x] Batch retrieval benchmark cases so local embedding and reranker models load once per run.
 
 Checkpoint: no enabled stage worsens protected-fact or grounding thresholds.
 
@@ -41,6 +44,8 @@ Checkpoint: no enabled stage worsens protected-fact or grounding thresholds.
 
 - [ ] Add GPU job serialization and recovery manifests.
 - [x] Add persistent cache keyed by source hash, adapter, adapter version, and effective configuration.
+- [x] Add bounded visual-evidence manifests with exact frame deduplication and scene-first selection.
+- [x] Add hash-anchored Codex visual annotation handoff and separate scored/Pending states.
 - [ ] Measure actual provider usage when an authorized telemetry source exists.
 - [ ] Package the Skill and publish only evidence-backed claims.
 
@@ -50,3 +55,6 @@ Checkpoint: no enabled stage worsens protected-fact or grounding thresholds.
 - [ ] Cover modern and legacy Office, born-digital and scanned PDF, webpages, email, archives, images, subtitles, audio, video, and code repositories.
 - [ ] Route encrypted, DRM-protected, corrupted, handwritten, or unsupported sources to an explicit source-preservation state.
 - [ ] Expand OCR CER beyond the clear synthetic smoke; measure transcription WER, table-cell recall, retrieval recall, grounding, downstream answer quality, latency, VRAM, and provider telemetry separately.
+- [x] Select and validate loopback Ollama + Qwen3-VL 8B for automatic local visual semantics.
+- [x] Measure independent OCR, VLM, combined visual-fact recall, frame-type accuracy, escalation, repeatability, and runtime on 12 labeled synthetic fixtures.
+- [ ] Measure perceptual duplicate detection, decorative skip precision, informative-frame recall, real-world visual-answer quality, and provider image-token telemetry.

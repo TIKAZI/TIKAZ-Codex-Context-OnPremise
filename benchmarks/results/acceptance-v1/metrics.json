@@ -43,10 +43,18 @@
   "multimodal": {
     "mean_word_error_rate": 0.058823529411764705,
     "media_cases": 2,
-    "note": "keyframe extraction is measured separately and is not evidence of visual understanding",
+    "note": "Visual facts are scored only from resolved, hash-anchored observations; unannotated keyframes remain Pending.",
     "transcript_cases": 2,
     "transcript_fact_denominator": 6,
     "transcript_fact_recall": 1.0,
+    "visual_exact_duplicates_skipped": 4,
+    "visual_fact_cases": 0,
+    "visual_fact_denominator": 0,
+    "visual_fact_recall": null,
+    "visual_frames_deferred": 0,
+    "visual_frames_resolved": 1,
+    "visual_frames_selected": 2,
+    "visual_frames_source": 6,
     "visual_understanding": "Pending",
     "word_error_rate_cases": 2
   }

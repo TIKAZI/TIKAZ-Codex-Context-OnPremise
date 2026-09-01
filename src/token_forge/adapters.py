@@ -55,6 +55,8 @@ def default_adapter_specs(configured: Mapping[str, str] | None = None) -> tuple[
         AdapterSpec("docling", tuple(filter(None, (configured.get("docling"), "docling")))),
         AdapterSpec("mineru", tuple(filter(None, (configured.get("mineru"), "mineru")))),
         AdapterSpec("paddleocr", tuple(filter(None, (configured.get("paddleocr"), "paddleocr")))),
+        AdapterSpec("paddleocr-python", tuple(filter(None, (configured.get("paddleocr_python"),)))),
+        AdapterSpec("ollama", tuple(filter(None, (configured.get("ollama"), "ollama")))),
         AdapterSpec("defuddle", tuple(filter(None, (configured.get("defuddle"), "defuddle")))),
         AdapterSpec("playwright", tuple(filter(None, (configured.get("playwright"), "playwright")))),
         AdapterSpec("yt-dlp", tuple(filter(None, (configured.get("yt_dlp"), "yt-dlp")))),

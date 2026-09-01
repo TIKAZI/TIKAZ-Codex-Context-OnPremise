@@ -282,10 +282,38 @@ def _media_case(
     if result.keyframes_dir and Path(result.keyframes_dir).is_dir():
         keyframes = [path for path in Path(result.keyframes_dir).iterdir() if path.is_file()]
     minimum_keyframes = int(case.get("minimum_keyframes", 0))
+    visual_counts: dict[str, int] = {}
+    visual_text = ""
+    visual_evidence_path = getattr(result, "visual_evidence_path", None)
+    if visual_evidence_path and Path(visual_evidence_path).is_file():
+        try:
+            visual_payload = json.loads(Path(visual_evidence_path).read_text(encoding="utf-8"))
+            raw_counts = visual_payload.get("counts", {})
+            if isinstance(raw_counts, dict):
+                visual_counts = {
+                    key: int(raw_counts.get(key, 0))
+                    for key in ("source", "unique", "selected", "duplicate", "deferred", "pending", "resolved")
+                }
+            raw_frames = visual_payload.get("frames", [])
+            if isinstance(raw_frames, list):
+                observations: list[str] = []
+                for frame in raw_frames:
+                    if not isinstance(frame, dict) or frame.get("semantic_status") != "resolved":
+                        continue
+                    for observation in frame.get("observations", []):
+                        if isinstance(observation, dict) and isinstance(observation.get("text"), str):
+                            observations.append(observation["text"])
+                visual_text = "\n".join(observations)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            visual_counts = {}
+            visual_text = ""
+    visual_facts = tuple(str(value) for value in case.get("visual_facts", ()))
+    visual_fact_recall = _normalized_literal_recall(visual_facts, visual_text)
     word_error_pass = word_error_rate is None or word_error_rate <= max_word_error_rate
     passed = (
         bool(result.success) and transcript_recall in {None, 1.0}
         and word_error_pass and len(keyframes) >= minimum_keyframes
+        and visual_fact_recall in {None, 1.0}
     )
     return {
         "id": str(case["id"]), "kind": "media", "required": bool(case.get("required", True)),
@@ -300,7 +328,14 @@ def _media_case(
         "word_error_rate": word_error_rate,
         "max_word_error_rate": max_word_error_rate if transcript_reference else None,
         "keyframe_count": len(keyframes), "minimum_keyframes": minimum_keyframes,
-        "visual_understanding": "Pending",
+        "visual_frames_source": visual_counts.get("source", len(keyframes)),
+        "visual_frames_selected": visual_counts.get("selected", len(keyframes)),
+        "visual_exact_duplicates_skipped": visual_counts.get("duplicate", 0),
+        "visual_frames_deferred": visual_counts.get("deferred", 0),
+        "visual_frames_resolved": visual_counts.get("resolved", 0),
+        "visual_fact_recall": visual_fact_recall,
+        "visual_fact_count": len(visual_facts),
+        "visual_understanding": "Measured" if visual_facts else "Pending",
         "runtime_ms": result.elapsed_ms,
         "failure_reason": "" if passed else (
             "transcript, WER, or keyframe gate failed" if result.success else result.status
@@ -364,6 +399,9 @@ def _aggregate(cases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
     table_case_count, table_denominator, table_recall = literal_metric("table_cell_count", "table_cell_recall")
     transcript_case_count, transcript_denominator, transcript_recall = literal_metric(
         "transcript_fact_count", "transcript_fact_recall"
+    )
+    visual_fact_case_count, visual_fact_denominator, visual_fact_recall = literal_metric(
+        "visual_fact_count", "visual_fact_recall"
     )
     cer_cases = [case for case in cases if case.get("character_error_rate") is not None]
     wer_cases = [case for case in cases if case.get("word_error_rate") is not None]
@@ -430,18 +468,37 @@ def _aggregate(cases: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, A
         "profiles": profiles,
         "measurement": "deterministic token estimate; not provider telemetry",
     }
+    media_case_count = sum(case.get("kind") == "media" for case in cases)
+    visual_understanding = (
+        "Pending" if not visual_fact_case_count
+        else "Measured" if visual_fact_case_count == media_case_count
+        else "Partial"
+    )
     multimodal = {
         "transcript_cases": transcript_case_count,
         "transcript_fact_denominator": transcript_denominator,
         "transcript_fact_recall": transcript_recall,
-        "media_cases": sum(case.get("kind") == "media" for case in cases),
-        "visual_understanding": "Pending",
+        "media_cases": media_case_count,
+        "visual_understanding": visual_understanding,
+        "visual_fact_cases": visual_fact_case_count,
+        "visual_fact_denominator": visual_fact_denominator,
+        "visual_fact_recall": visual_fact_recall,
+        "visual_frames_source": sum(int(case.get("visual_frames_source", 0)) for case in cases),
+        "visual_frames_selected": sum(int(case.get("visual_frames_selected", 0)) for case in cases),
+        "visual_exact_duplicates_skipped": sum(
+            int(case.get("visual_exact_duplicates_skipped", 0)) for case in cases
+        ),
+        "visual_frames_deferred": sum(int(case.get("visual_frames_deferred", 0)) for case in cases),
+        "visual_frames_resolved": sum(int(case.get("visual_frames_resolved", 0)) for case in cases),
         "word_error_rate_cases": len(wer_cases),
         "mean_word_error_rate": (
             sum(float(case["word_error_rate"]) for case in wer_cases) / len(wer_cases)
             if wer_cases else None
         ),
-        "note": "keyframe extraction is measured separately and is not evidence of visual understanding",
+        "note": (
+            "Visual facts are scored only from resolved, hash-anchored observations; "
+            "unannotated keyframes remain Pending."
+        ),
     }
     return status_counts, {"efficiency": efficiency, "fidelity": fidelity, "multimodal": multimodal}
 
@@ -477,6 +534,27 @@ def _evidence_card(summary: dict[str, Any], cases: list[dict[str, Any]]) -> str:
                 f"{'N/A' if mean is None else f'{float(mean):.2%}'} | "
                 f"{'N/A' if profile_weighted is None else f'{float(profile_weighted):.2%}'} |"
             )
+    multimodal = summary.get("multimodal", {})
+    visual_source = int(multimodal.get("visual_frames_source", 0))
+    visual_duplicates = int(multimodal.get("visual_exact_duplicates_skipped", 0))
+    duplicate_ratio = visual_duplicates / visual_source if visual_source else None
+    visual_recall = multimodal.get("visual_fact_recall")
+    transcript_recall = multimodal.get("transcript_fact_recall")
+    mean_wer = multimodal.get("mean_word_error_rate")
+    lines.extend([
+        "", "## Multimodal evidence", "",
+        f"- Transcript fact recall: {'N/A' if transcript_recall is None else f'{float(transcript_recall):.2%}'}",
+        f"- Mean transcription WER: {'N/A' if mean_wer is None else f'{float(mean_wer):.2%}'}",
+        f"- Visual frames: {visual_source} source / {int(multimodal.get('visual_frames_selected', 0))} selected",
+        f"- Exact duplicate frames skipped: {visual_duplicates}"
+        + ("" if duplicate_ratio is None else f" ({duplicate_ratio:.2%} of source frames)"),
+        f"- Deferred visual frames: {int(multimodal.get('visual_frames_deferred', 0))}",
+        f"- Resolved visual frames: {int(multimodal.get('visual_frames_resolved', 0))}",
+        f"- Visual understanding: {multimodal.get('visual_understanding', 'Pending')}",
+        f"- Visual fact recall: {'Pending' if visual_recall is None else f'{float(visual_recall):.2%}'}",
+        "",
+        "> Frame reduction is routing evidence, not provider image-token telemetry.",
+    ])
     lines.extend([
         "", "## Cases", "",
         "| Case | Kind | Status | Token reduction | Protected recall | Anchor recall | Runtime |",

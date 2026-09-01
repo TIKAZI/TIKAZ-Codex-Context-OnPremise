@@ -5,11 +5,18 @@ import json
 import re
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from .cost import estimate_tokens
 from .models import PackResult
 from .protection import extract_protected_literals, protected_recall
+from .retrieval import (
+    build_query_plan,
+    fuse_and_diversify,
+    query_coverage,
+    retrieval_terms,
+    select_evidence,
+)
 from .specialized import build_python_context, build_table_context
 
 
@@ -104,6 +111,7 @@ def build_text_pack(
     adapter: str = "text-pack",
     adapter_version: str = "1",
     required_literals: Sequence[str] = (),
+    query_variants: Sequence[str] = (),
 ) -> PackResult:
     if budget_tokens <= 0:
         raise ValueError("budget_tokens must be positive")
@@ -114,6 +122,7 @@ def build_text_pack(
         "budget_tokens": budget_tokens,
         "safety_class": safety_class,
         "required_literals": tuple(required_literals),
+        "query_variants": tuple(query_variants),
     }
     cache_key = _cache_key(source_hash, adapter, adapter_version, effective_config)
     if cache_dir is not None:
@@ -234,14 +243,59 @@ def build_text_pack(
             _write_result(output_dir, result)
         return result
 
-    ranked = sorted(candidates, key=lambda item: (-_score(item[1], query_terms), item[0]))
-    for index, block in ranked:
-        if _score(block, query_terms) <= 0 and selected:
-            continue
+    retrieval_chunks = [
+        {"id": str(index), "index": index, "text": block}
+        for index, block in candidates
+    ]
+    ranked = (
+        fuse_and_diversify(retrieval_chunks, query, query_variants=query_variants)
+        if retrieval_chunks else []
+    )
+    query_plan = build_query_plan(query, query_variants=query_variants)
+    mandatory_terms = {
+        term for _, block in mandatory for term in retrieval_terms(block)
+    }
+    mandatory_facets = {
+        facet.name for facet in query_plan.facets
+        if mandatory_terms & set(facet.terms)
+    }
+    retrieval_selection = select_evidence(
+        ranked, query, query_variants=query_variants, covered_facets=mandatory_facets
+    )
+    has_query_evidence = retrieval_selection.status != "insufficient-evidence"
+    if not has_query_evidence and not selected:
+        result = PackResult(
+            text=source,
+            mode="insufficient-evidence",
+            input_tokens=input_tokens,
+            final_tokens=input_tokens,
+            protected_literals=protected,
+            protected_recall=1.0,
+            reduction_ratio=0.0,
+            source_hash=source_hash,
+            budget_conflict=True,
+            cache_key=cache_key,
+            evidence={
+                "retrieval_strategy": "lexical-mmr",
+                "retrieval_status": "insufficient-evidence",
+                "query_coverage": 0.0,
+            },
+        )
+        if cache_dir is not None:
+            _write_cache(cache_dir, result)
+        if output_dir is not None:
+            _write_result(output_dir, result)
+        return result
+
+    retrieval_added: list[Mapping[str, object]] = []
+    for item in retrieval_selection.items:
+        index = int(item["index"])
+        block = next(value for candidate_index, value in candidates if candidate_index == index)
         proposal = _render([value for _, value in sorted(selected + [(index, block)])])
         if estimate_tokens(proposal) <= budget_tokens:
             selected.append((index, block))
             selected_ids.add(index)
+            retrieval_added.append(item)
 
     if not selected and unique_blocks:
         selected.append(unique_blocks[0])
@@ -257,6 +311,22 @@ def build_text_pack(
 
     omitted = tuple(index for index in range(len(original_blocks)) if index not in selected_ids)
     reduction = max(0.0, 1 - (final_tokens / input_tokens)) if input_tokens else 0.0
+    required_facets = {facet.name for facet in query_plan.facets}
+    covered_facets = mandatory_facets | {
+        str(facet)
+        for item in retrieval_added
+        for facet in item.get("facet_hits", ())
+    }
+    facet_coverage = (
+        len(covered_facets & required_facets) / len(required_facets)
+        if required_facets else 1.0
+    )
+    if not has_query_evidence:
+        retrieval_status = "protected-only"
+    elif len(retrieval_added) < len(retrieval_selection.items):
+        retrieval_status = "budget-limited"
+    else:
+        retrieval_status = retrieval_selection.status
     result = PackResult(
         text=selected_text,
         mode=mode,
@@ -269,6 +339,15 @@ def build_text_pack(
         omitted_blocks=omitted,
         budget_conflict=mode == "budget-conflict",
         cache_key=cache_key,
+        evidence={
+            "retrieval_strategy": "bm25-facet-rrf-mmr",
+            "retrieval_status": retrieval_status,
+            "query_coverage": query_coverage(query, (block for _, block in selected)),
+            "facet_coverage": facet_coverage,
+            "retrieval_confidence": retrieval_selection.confidence,
+            "dynamic_top_k": len(mandatory) + len(retrieval_added),
+            "selected_block_ids": tuple(sorted(selected_ids)),
+        },
     )
     if cache_dir is not None:
         _write_cache(cache_dir, result)

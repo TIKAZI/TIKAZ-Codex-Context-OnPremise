@@ -1,0 +1,38 @@
+{
+  "case_count": 12,
+  "elapsed_seconds": 0.013386,
+  "measurement": "fixed manifest retrieval ranking; separate from provider token telemetry",
+  "metrics": {
+    "dynamic_facet_coverage": 0.8155618686868688,
+    "dynamic_precision": 0.9249999999999999,
+    "dynamic_recall": 0.9444444444444445,
+    "dynamic_selected_count": 3.1666666666666665,
+    "evidence_precision": 0.9444444444444445,
+    "mrr": 1.0,
+    "ndcg_at_1": 1.0,
+    "ndcg_at_3": 0.9608934394981037,
+    "precision_at_1": 1.0,
+    "precision_at_3": 0.9444444444444445,
+    "query_coverage": 0.4628428725569052,
+    "recall_at_1": 0.3333333333333333,
+    "recall_at_3": 0.9444444444444445,
+    "selected_token_reduction_estimated": 0.3901003817323641
+  },
+  "minimums": {
+    "mrr": 0.9,
+    "ndcg_at_3": 0.8,
+    "precision_at_3": 0.8,
+    "recall_at_3": 0.8
+  },
+  "mode": "economy",
+  "schema_version": 1,
+  "validation": {
+    "all_required_pass": true,
+    "gates": {
+      "mrr": true,
+      "ndcg_at_3": true,
+      "precision_at_3": true,
+      "recall_at_3": true
+    }
+  }
+}

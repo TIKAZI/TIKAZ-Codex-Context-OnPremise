@@ -158,6 +158,8 @@ class AcceptanceBenchmarkTests(unittest.TestCase):
             card = (output / "evidence-card.md").read_text(encoding="utf-8")
             self.assertIn("anchor-failure", card)
             self.assertIn("Pending", card)
+            self.assertIn("## Multimodal evidence", card)
+            self.assertIn("Visual understanding", card)
 
     def test_cases_without_declared_facts_do_not_inflate_fidelity_denominator(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -263,6 +265,7 @@ class AcceptanceBenchmarkTests(unittest.TestCase):
                                 "source_file": "clip.mp4",
                                 "language": "en",
                                 "transcript_facts": ["MEDIA_FACT_48"],
+                                "visual_facts": ["VISUAL_FACT_48"],
                                 "transcript_reference_file": "transcript-reference.txt",
                                 "minimum_keyframes": 2,
                             },
@@ -299,10 +302,37 @@ class AcceptanceBenchmarkTests(unittest.TestCase):
                 frames.mkdir()
                 (frames / "one.jpg").write_bytes(b"1")
                 (frames / "two.jpg").write_bytes(b"2")
+                visual = output / "visual-evidence.json"
+                visual.write_text(json.dumps({
+                    "schema_version": 1,
+                    "counts": {
+                        "source": 3, "unique": 2, "selected": 2,
+                        "duplicate": 1, "deferred": 0, "pending": 2, "resolved": 0,
+                    },
+                    "frames": [],
+                }), encoding="utf-8")
+                visual.write_text(json.dumps({
+                    "schema_version": 1,
+                    "counts": {
+                        "source": 3, "unique": 2, "selected": 2,
+                        "duplicate": 1, "deferred": 0, "pending": 1, "resolved": 1,
+                    },
+                    "frames": [{
+                        "frame_id": "sha256:" + "1" * 64,
+                        "frame_sha256": "1" * 64,
+                        "routing_status": "selected",
+                        "semantic_status": "resolved",
+                        "observations": [{
+                            "kind": "visual-observation",
+                            "text": "The frame contains VISUAL_FACT_48.",
+                            "confidence": "high",
+                        }],
+                    }],
+                }), encoding="utf-8")
                 return SimpleNamespace(
                     success=True, status="success", elapsed_ms=16,
                     transcript_path=str(transcript), keyframes_dir=str(frames),
-                    scenes_path=None,
+                    scenes_path=None, visual_evidence_path=str(visual),
                 )
 
             model_result = SimpleNamespace(
@@ -333,7 +363,12 @@ class AcceptanceBenchmarkTests(unittest.TestCase):
             metrics = json.loads((output / "metrics.json").read_text(encoding="utf-8"))
             self.assertEqual(metrics["fidelity"]["table_cell_recall"], 1.0)
             self.assertEqual(metrics["multimodal"]["transcript_fact_recall"], 1.0)
-            self.assertEqual(metrics["multimodal"]["visual_understanding"], "Pending")
+            self.assertEqual(metrics["multimodal"]["visual_understanding"], "Measured")
+            self.assertEqual(metrics["multimodal"]["visual_fact_recall"], 1.0)
+            self.assertEqual(metrics["multimodal"]["visual_fact_denominator"], 1)
+            self.assertEqual(metrics["multimodal"]["visual_frames_source"], 3)
+            self.assertEqual(metrics["multimodal"]["visual_frames_selected"], 2)
+            self.assertEqual(metrics["multimodal"]["visual_exact_duplicates_skipped"], 1)
 
 
 if __name__ == "__main__":

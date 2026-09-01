@@ -67,6 +67,16 @@ class ZipConversionTests(unittest.TestCase):
             self.assertIn("assets/logo.bin", markdown)
             self.assertFalse((root / "docs").exists())
 
+    def test_zip_escapes_pipe_characters_in_markdown_inventory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "archive.zip"
+            with zipfile.ZipFile(source, "w") as archive:
+                archive.writestr("docs/a|b.txt", "safe")
+
+            markdown = convert_zip(source)
+
+            self.assertIn(r"docs/a\|b.txt", markdown)
+
     def test_zip_rejects_parent_traversal(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             source = Path(temp) / "archive.zip"

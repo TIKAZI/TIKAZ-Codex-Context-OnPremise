@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Mapping
 
 from .conversion import ProcessOutcome, _run_process
+from .visual import build_visual_evidence, resolve_local_visual_evidence
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ class MediaResult:
     elapsed_ms: int
     transcription_runtime_path: str | None = None
     error: str = ""
+    visual_evidence_path: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -33,6 +35,7 @@ def process_local_media(
     *,
     language: str = "zh",
     timeout_seconds: int = 600,
+    max_visual_frames: int = 12,
 ) -> MediaResult:
     if not source.is_file():
         raise FileNotFoundError(source)
@@ -90,10 +93,39 @@ def process_local_media(
         elif scene_outcome.returncode != 0:
             scenes_path = None
 
+    visual_evidence_path: Path | None = None
+    if frames_dir and any(path.is_file() for path in frames_dir.iterdir()):
+        visual_evidence = build_visual_evidence(
+            frames_dir,
+            output_dir / "visual-evidence.json",
+            max_selected=max_visual_frames,
+        )
+        visual_evidence_path = Path(visual_evidence.output_path)
+        if adapters.get("ollama_host") and adapters.get("ollama_model"):
+            try:
+                resolve_local_visual_evidence(
+                    visual_evidence_path,
+                    dict(adapters),
+                    timeout_seconds=min(timeout_seconds, 180),
+                )
+            except (OSError, TimeoutError, ValueError, json.JSONDecodeError) as error:
+                payload = json.loads(visual_evidence_path.read_text(encoding="utf-8"))
+                payload["local_analysis"] = {
+                    "status": "failed",
+                    "error": f"{type(error).__name__}: {error}"[:1000],
+                    "fallback": "hash-anchored Codex handoff",
+                }
+                visual_evidence_path.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+
     result = MediaResult(True, "success", str(source.resolve()), str(transcript.resolve()),
                          str(scenes_path.resolve()) if scenes_path else None,
                          str(frames_dir.resolve()) if frames_dir else None,
                          round((time.perf_counter() - started) * 1000),
-                         str(transcription_runtime.resolve()) if transcription_runtime.is_file() else None)
+                         str(transcription_runtime.resolve()) if transcription_runtime.is_file() else None,
+                         visual_evidence_path=(
+                             str(visual_evidence_path.resolve()) if visual_evidence_path else None
+                         ))
     (output_dir / "media.json").write_text(json.dumps(result.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     return result

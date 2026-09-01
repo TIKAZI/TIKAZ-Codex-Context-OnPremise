@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from .adapters import probe_all
 from .acceptance import run_acceptance_manifest
@@ -14,7 +15,10 @@ from .model_pipeline import optimize_text_pack
 from .platform_media import inspect_platform_media
 from .pipeline import build_text_pack
 from .router import profile_source
+from .retrieval_benchmark import run_retrieval_manifest
 from .web import prepare_web_url
+from .visual import build_visual_evidence, resolve_local_visual_evidence
+from .visual_benchmark import run_visual_manifest
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -47,6 +51,33 @@ def _parser() -> argparse.ArgumentParser:
     media.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
     media.add_argument("--language", default="zh")
     media.add_argument("--timeout", type=int, default=600)
+    media.add_argument("--max-visual-frames", type=int, default=12)
+
+    visual = sub.add_parser(
+        "visual-evidence", help="Build a bounded, hash-anchored keyframe handoff"
+    )
+    visual.add_argument("--frames", required=True, type=Path)
+    visual.add_argument("--output", required=True, type=Path)
+    visual.add_argument("--max-frames", type=int, default=12)
+    visual.add_argument("--annotations", type=Path)
+
+    visual_analyze = sub.add_parser(
+        "visual-analyze", help="Resolve selected frames with loopback-only local OCR and VLM"
+    )
+    visual_analyze.add_argument("--manifest", required=True, type=Path)
+    visual_analyze.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    visual_analyze.add_argument("--minimum-confidence", type=float, default=0.75)
+    visual_analyze.add_argument("--timeout", type=int, default=180)
+
+    visual_benchmark = sub.add_parser(
+        "benchmark-visual", help="Measure local OCR/VLM facts and routing on fixed images"
+    )
+    visual_benchmark.add_argument("--manifest", required=True, type=Path)
+    visual_benchmark.add_argument("--frames", required=True, type=Path)
+    visual_benchmark.add_argument("--output", required=True, type=Path)
+    visual_benchmark.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    visual_benchmark.add_argument("--minimum-confidence", type=float, default=0.75)
+    visual_benchmark.add_argument("--timeout", type=int, default=180)
 
     platform = sub.add_parser("platform-media", help="Inspect platform metadata/subtitles without downloading media")
     platform.add_argument("--url", required=True)
@@ -61,6 +92,12 @@ def _parser() -> argparse.ArgumentParser:
     pack.add_argument("--budget", required=True, type=int)
     pack.add_argument("--output", required=True, type=Path)
     pack.add_argument("--cache-dir", type=Path, default=Path(".token-forge/cache"))
+    pack.add_argument(
+        "--query-variant",
+        action="append",
+        default=[],
+        help="Repeat for bounded, auditable search hints; variants are never treated as source facts",
+    )
     pack.add_argument(
         "--safety-class",
         choices=("auto", "text", "code", "contract", "table", "financial", "command", "security"),
@@ -89,6 +126,14 @@ def _parser() -> argparse.ArgumentParser:
     model_benchmark.add_argument("--manifest", required=True, type=Path)
     model_benchmark.add_argument("--output", required=True, type=Path)
     model_benchmark.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    retrieval_benchmark = sub.add_parser(
+        "benchmark-retrieval", help="Measure retrieval hit quality on a fixed labeled manifest"
+    )
+    retrieval_benchmark.add_argument("--manifest", required=True, type=Path)
+    retrieval_benchmark.add_argument("--output", required=True, type=Path)
+    retrieval_benchmark.add_argument("--mode", choices=("economy", "onpremise"), required=True)
+    retrieval_benchmark.add_argument("--config", type=Path, default=Path(".token-forge.local.toml"))
+    retrieval_benchmark.add_argument("--timeout", type=int, default=900)
     acceptance = sub.add_parser(
         "benchmark-acceptance", help="Run the versioned full-scenario local acceptance suite"
     )
@@ -180,6 +225,64 @@ def _model_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
     }
 
 
+def _visual_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
+    ollama = config.adapters.get("ollama")
+    paddle_python = config.adapters.get("paddleocr_python")
+    model = config.adapters.get("ollama_model", "").strip()
+    host = config.adapters.get("ollama_host", "").strip()
+    runtime_ready = bool(ollama and Path(ollama).is_file())
+    ocr_ready = bool(paddle_python and Path(paddle_python).is_file())
+    parsed_host = urlsplit(host)
+    loopback = (
+        parsed_host.scheme == "http"
+        and parsed_host.hostname in {"127.0.0.1", "localhost", "::1"}
+        and not parsed_host.username
+        and not parsed_host.password
+        and not parsed_host.query
+        and not parsed_host.fragment
+    )
+    eligible = runtime_ready and ocr_ready and bool(model) and loopback
+    validated = False
+    report_path = config.adapters.get("visual_validation")
+    if eligible and report_path and Path(report_path).is_file():
+        try:
+            report = json.loads(Path(report_path).read_text(encoding="utf-8"))
+            validation = report.get("validation", {})
+            validated = bool(
+                validation.get("all_required_pass", validation.get("visual_facts")) is True
+                and report.get("validated_models", {}).get("vlm") == model
+            )
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            validated = False
+    return {
+        "codex_handoff": {
+            "eligible": True,
+            "status": "ready",
+            "reason": "bounded hash-anchored keyframe manifests are available",
+        },
+        "automatic_local_vlm": {
+            "eligible": eligible,
+            "validated": validated,
+            "status": (
+                "validated" if validated else "configured-unvalidated" if eligible else "not-configured"
+            ),
+            "model": model or None,
+            "reason": (
+                "independent visual-fact validation passed"
+                if validated
+                else "local OCR and loopback VLM are configured; run visual validation"
+                if eligible
+                else "local OCR, loopback Ollama runtime, and model are all required"
+            ),
+        },
+        "remote_vision": {
+            "eligible": False,
+            "status": "opt-in-only",
+            "reason": "frames are never sent to a remote service implicitly",
+        },
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "doctor":
@@ -191,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
             "adapters": [status.to_dict() for status in probe_all(configured=config.adapters)],
             "conversion_gates": _conversion_gates(config),
             "model_gates": _model_gates(config),
+            "visual_gates": _visual_gates(config),
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return 0
@@ -215,9 +319,41 @@ def main(argv: list[str] | None = None) -> int:
             config.adapters,
             language=args.language,
             timeout_seconds=args.timeout,
+            max_visual_frames=args.max_visual_frames,
         )
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         return 0 if result.success else 3
+    if args.command == "visual-evidence":
+        result = build_visual_evidence(
+            args.frames,
+            args.output / "visual-evidence.json",
+            max_selected=args.max_frames,
+            annotations_path=args.annotations,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "visual-analyze":
+        config = load_config(args.config)
+        result = resolve_local_visual_evidence(
+            args.manifest,
+            config.adapters,
+            minimum_vlm_confidence=args.minimum_confidence,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "benchmark-visual":
+        config = load_config(args.config)
+        result = run_visual_manifest(
+            args.manifest,
+            args.frames,
+            args.output,
+            config.adapters,
+            minimum_vlm_confidence=args.minimum_confidence,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result.get("validation", {}).get("all_required_pass") is True else 2
     if args.command == "platform-media":
         config = load_config(args.config)
         result = inspect_platform_media(
@@ -255,6 +391,7 @@ def main(argv: list[str] | None = None) -> int:
             args.output,
             safety_class=safety_class,
             cache_dir=args.cache_dir,
+            query_variants=tuple(args.query_variant),
         )
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
         return 0 if not result.budget_conflict else 2
@@ -281,6 +418,17 @@ def main(argv: list[str] | None = None) -> int:
         result = run_model_manifest(args.manifest, args.output, config.adapters)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["all_protected_pass"] else 2
+    if args.command == "benchmark-retrieval":
+        adapters = load_config(args.config).adapters if args.mode == "onpremise" else {}
+        result = run_retrieval_manifest(
+            args.manifest,
+            args.output,
+            mode=args.mode,
+            adapters=adapters,
+            timeout_seconds=args.timeout,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result["validation"]["all_required_pass"] else 2
     if args.command == "benchmark-acceptance":
         config = load_config(args.config)
         result = run_acceptance_manifest(

@@ -10,6 +10,7 @@
 | Dynamic webpage | Playwright + Defuddle | source HTML | rendered content is non-empty |
 | Video/audio | existing faster-whisper float16 | platform subtitles | timestamped transcript exists |
 | Keyframes | PySceneDetect + FFmpeg | bounded interval frames | scene and OCR coverage pass |
+| Visual semantics | PP-OCRv5 mobile + Qwen3-VL 8B over loopback Ollama | bounded SHA-256 Codex handoff | selected-frame anchors and declared visual facts pass |
 | Retrieval | BM25 + BGE-M3 | BM25 | fixed-query recall passes |
 | Reranking | domain-tested BGE reranker | fused retrieval order | no domain regression |
 | Prose compression | LLMLingua-2 | extractive selection/pass-through | facts, anchors and grounding pass |
@@ -28,7 +29,9 @@ Dependencies are installed into isolated G-drive environments after their profil
 | Dense multilingual retrieval | [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | MIT | `5617a9f61b028005a4858fdac845db406aefb181` |
 | Cross-encoder reranking | [BAAI/bge-reranker-v2-m3](https://huggingface.co/BAAI/bge-reranker-v2-m3) | Apache-2.0 | `953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e` |
 | Low-risk prose compression | [microsoft/llmlingua-2-xlm-roberta-large-meetingbank](https://huggingface.co/microsoft/llmlingua-2-xlm-roberta-large-meetingbank) | MIT | `ebaba9b0e874dadd3003ffcff828e4397e568089` |
+| Visual OCR | [PaddleOCR PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR) | Apache-2.0 | cached `PP-OCRv5_mobile_det` + `PP-OCRv5_mobile_rec` |
+| Visual semantics | [Qwen/Qwen3-VL-8B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct) | Apache-2.0 | Ollama blob `sha256:ed12a4674d72...` |
 
-These models remain separate third-party works. TIKAZ Token Forge owns its routing, evidence gates, adapters, benchmarks, and integration, not the upstream model weights. Recheck the linked model cards before redistributing weights.
+These models remain separate third-party works. TIKAZ Context On-Premise owns its routing, evidence gates, adapters, benchmarks, and integration, not the upstream model weights. Recheck the linked model cards before redistributing weights.
 
-Local smoke evidence currently covers MinerU image/PDF OCR, Playwright Chromium 1234 + Defuddle, and FFmpeg + CUDA faster-whisper + PySceneDetect. The configured BGE-M3, reranking, and LLMLingua directories remain intentionally ineligible until their complete weights and quality fixtures pass.
+Local smoke evidence covers MinerU image/PDF OCR, Playwright Chromium 1234 + Defuddle, FFmpeg + CUDA faster-whisper + PySceneDetect, BGE-M3 retrieval, BGE reranking, guarded LLMLingua-2 compression, and PP-OCRv5 mobile OCR. Qwen3-VL is exposed only through Ollama's loopback API. The runtime follows [Ollama's RTX 50-series support matrix](https://docs.ollama.com/gpu) and [structured chat API](https://docs.ollama.com/api/chat); remote vision remains disabled by default.

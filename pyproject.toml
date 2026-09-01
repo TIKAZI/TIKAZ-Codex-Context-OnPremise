@@ -4,13 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tikaz-token-forge"
-version = "0.1.0"
-description = "Dependency-rich local context compiler for Codex"
+version = "0.2.0"
+description = "Local-first multimodal context compiler for Codex with evidence-aware retrieval"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "TIKAZ" }]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/TIKAZI/TIKAZ-Codex-Context-OnPremise"
+Documentation = "https://github.com/TIKAZI/TIKAZ-Codex-Context-OnPremise#readme"
+Issues = "https://github.com/TIKAZI/TIKAZ-Codex-Context-OnPremise/issues"
 
 [project.scripts]
 token-forge = "token_forge.cli:main"
@@ -20,4 +25,3 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

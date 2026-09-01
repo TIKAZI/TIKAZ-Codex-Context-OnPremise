@@ -7,7 +7,7 @@ Build a local-first, dependency-rich context compiler for Codex. Reduce total mo
 ## Commands
 
 - Test: `python -m unittest discover -s tests -v`
-- Validate Skill: `python C:\Users\Jiufang\.codex-shared\skills\.system\skill-creator\scripts\quick_validate.py skills\token-forge`
+- Validate Skill: `python <path-to-skill-creator>\scripts\quick_validate.py skills\token-forge`
 - CLI: `python -m token_forge --help`
 - Benchmark: `python -m token_forge benchmark --manifest benchmarks\manifest.json --output benchmark-results`
 - Full acceptance: `python -m token_forge benchmark-acceptance --manifest benchmarks\acceptance-manifest.json --output benchmark-acceptance-results --config .token-forge.local.toml`

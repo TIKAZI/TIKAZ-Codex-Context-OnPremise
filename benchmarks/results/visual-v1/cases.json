@@ -1,0 +1,443 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "document-release",
+      "profile": "document",
+      "file": "01-document-release.png",
+      "source_sha256": "b3e189933694cee7fb9f3a1b4e12c70b3358285fe3e468c70ec0fdd955974ac4",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "document",
+      "actual_frame_type": "document",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "v4.8.0",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "2026-08-20",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "DOC-4820",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 2.5450661
+    },
+    {
+      "id": "document-zh",
+      "profile": "document",
+      "file": "02-document-zh.png",
+      "source_sha256": "a44cbab53f6b95aa0e498c5d70ea278121b51bf55fde44f7128352074f96bb3e",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "document",
+      "actual_frame_type": "document",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "V3.6.1",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "CN-731",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "通过",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 2.4134548
+    },
+    {
+      "id": "ui-settings",
+      "profile": "ui",
+      "file": "03-ui-settings.png",
+      "source_sha256": "2b13378c8ed9921dd08bf21ef23d3e072612ee5fbc99d3776ae97e9181c25cbe",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "ui",
+      "actual_frame_type": "document",
+      "frame_type_match": false,
+      "facts": [
+        {
+          "fact": "Strict",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Local only",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "2026.8",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.1174972
+    },
+    {
+      "id": "ui-dashboard",
+      "profile": "ui",
+      "file": "04-ui-dashboard.png",
+      "source_sha256": "f6554fd7ea2c28625f528ac5eff3749a2ac20a3a6a912914c41f7764342e504e",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "ui",
+      "actual_frame_type": "document",
+      "frame_type_match": false,
+      "facts": [
+        {
+          "fact": "89.57%",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "55.96%",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "80/80",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.5707304
+    },
+    {
+      "id": "table-pricing",
+      "profile": "table",
+      "file": "05-table-pricing.png",
+      "source_sha256": "9c7df9934b9ab0fbcd3a14ea991dcbdfc1ffaf965315e26ab32fd5c57b4332d5",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "table",
+      "actual_frame_type": "table",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "Basic $9",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Pro $29",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Team $79",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 4.626273
+    },
+    {
+      "id": "chart-bars",
+      "profile": "chart",
+      "file": "06-chart-bars.png",
+      "source_sha256": "988bd4fb39bb6015727ee45365c086e53ae556ab3bab3361f7fce8b6d5736c91",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "chart",
+      "actual_frame_type": "chart",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "OCR 42",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "VLM 68",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Hybrid 91",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 7.4642663
+    },
+    {
+      "id": "diagram-flow",
+      "profile": "diagram",
+      "file": "07-diagram-flow.png",
+      "source_sha256": "5b7e6a1b28417ec7e3a151983631c81fe4ad3076ae5c958a964c221896827a7f",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "diagram",
+      "actual_frame_type": "diagram",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "Input",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "OCR",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "VLM",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Codex Review",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.7568965
+    },
+    {
+      "id": "spatial-shapes",
+      "profile": "spatial",
+      "file": "08-spatial-shapes.png",
+      "source_sha256": "aa26bc43675bdbf2eae71b105994e22b25a2b4fa1979d64754535a4f5b8c76b9",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "diagram",
+      "actual_frame_type": "diagram",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "Blue square",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Purple circle",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "LEFT OF",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 2.5970781
+    },
+    {
+      "id": "warning-dialog",
+      "profile": "ui",
+      "file": "09-warning-dialog.png",
+      "source_sha256": "fcee7a6ec0962d7c9fb817331d83fe60c76de736e6f6a9d45b99f4d89d287860",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "ui",
+      "actual_frame_type": "ui",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "TF-409",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Review source",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Blocked",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.7615916
+    },
+    {
+      "id": "invoice",
+      "profile": "document",
+      "file": "10-invoice.png",
+      "source_sha256": "4eebe993f86fe095526fc06ad265a63d87fa2756eff8aa51aaec787f5abbf1ec",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "document",
+      "actual_frame_type": "document",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "INV-9401",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "188000.50",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "2026-12-21",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.4001618
+    },
+    {
+      "id": "timeline",
+      "profile": "diagram",
+      "file": "11-timeline.png",
+      "source_sha256": "fd3d27e114692a97df266430223294180f1decd51df86a76212e2d85c4df5e55",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "diagram",
+      "actual_frame_type": "diagram",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "Extract 2.1s",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "OCR 5.4s",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "VLM 12.8s",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 8.0656721
+    },
+    {
+      "id": "warehouse-scene",
+      "profile": "scene",
+      "file": "12-warehouse-scene.png",
+      "source_sha256": "82b46dc62468d8f426881579e711dee51907853d042cc3d2b0cef55f08c6fa5a",
+      "semantic_status": "resolved-local",
+      "expected_frame_type": "diagram",
+      "actual_frame_type": "diagram",
+      "frame_type_match": true,
+      "facts": [
+        {
+          "fact": "Dock 7",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "Bay C",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        },
+        {
+          "fact": "3 pallets",
+          "ocr": true,
+          "vlm": true,
+          "combined": true
+        }
+      ],
+      "combined_fact_recall": 1.0,
+      "ocr_fact_recall": 1.0,
+      "vlm_fact_recall": 1.0,
+      "model_reported_confidence": 1.0,
+      "local_prompt_eval_count": 1353,
+      "local_runtime_seconds": 3.4593832
+    }
+  ]
+}

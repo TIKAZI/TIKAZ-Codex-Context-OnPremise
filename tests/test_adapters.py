@@ -26,6 +26,8 @@ class AdapterTests(unittest.TestCase):
             "docling": "G:/envs/documents/docling.exe",
             "mineru": "G:/envs/mineru/mineru.exe",
             "paddleocr": "G:/envs/paddleocr/paddleocr.exe",
+            "paddleocr_python": "G:/envs/paddleocr/python.exe",
+            "ollama": "G:/runtimes/ollama/ollama.exe",
             "defuddle": "G:/node/defuddle.CMD",
             "playwright": "G:/node/playwright.CMD",
             "yt_dlp": "G:/envs/media/yt-dlp.exe",

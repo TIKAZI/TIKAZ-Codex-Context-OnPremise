@@ -8,14 +8,14 @@ No converter is universal. Token Forge profiles each source, selects the cheapes
 | Modern Office | DOCX, PPTX, XLSX | MarkItDown | Docling; preserve source |
 | Legacy Office | DOC, PPT, XLS, ODT | LibreOffice conversion | preserve source |
 | PDF | born-digital PDF 1.x/2.0 | MarkItDown | Docling → MinerU → source |
-| Scans and images | PNG, JPEG, WebP, TIFF, BMP | PaddleOCR | MinerU or selected vision crop |
+| Scans and images | PNG, JPEG, WebP, TIFF, BMP | MinerU on the validated host | separately verified local OCR or selected vision crop; preserve source |
 | E-books | EPUB | MarkItDown or Pandoc | preserve source |
 | Web | URL, HTML, MHTML | Defuddle | Playwright render → Defuddle → HTML source |
 | Email | EML | Python email parser: headers, body, attachment inventory | MSG and attachment content remain source-only |
 | Archives | ZIP | bounded in-place inventory and selected text read | 7Z/TAR/GZ remain source-only; nested ZIP is inventory-only |
 | Subtitles | SRT, VTT, ASS | native parser | source preservation |
 | Audio | MP3, WAV, M4A, AAC, FLAC, OGG, OPUS | existing faster-whisper | platform transcript or source |
-| Video | MP4, MKV, MOV, WebM, AVI, M4V, TS, MTS | FFmpeg + faster-whisper | keyframes + OCR/vision |
+| Video | MP4, MKV, MOV, WebM, AVI, M4V, TS, MTS | FFmpeg + faster-whisper + PySceneDetect | exact frame dedup + bounded Codex visual handoff; local/remote VLM remains explicit |
 | Platforms | URLs supported by configured platform tools | official/platform subtitles first | yt-dlp or existing platform-specific workflow |
 | Code and logs | Python plus common source/config/log formats | exact Python AST dependency slice; ripgrep selection elsewhere | source snippets; never learned compression |
 | Tables and finance | CSV, TSV, spreadsheets and extracted tables | bounded CSV schema-aware aggregate with reconciliation | source table; never learned compression |

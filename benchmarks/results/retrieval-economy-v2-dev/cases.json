@@ -1,0 +1,828 @@
+[
+  {
+    "id": "release-migration",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.6,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.2702702702702703
+    },
+    "mode": "economy",
+    "query": "release database migration rollback backup verification",
+    "ranked_ids": [
+      "rel-rollback",
+      "rel-backup",
+      "rel-owner",
+      "rel-verify",
+      "rel-command",
+      "noise-brand",
+      "noise-menu",
+      "noise-office"
+    ],
+    "relevant_ids": [
+      "rel-backup",
+      "rel-command",
+      "rel-owner",
+      "rel-rollback",
+      "rel-verify"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "rel-rollback",
+        "rel-backup",
+        "rel-owner",
+        "rel-verify",
+        "rel-command"
+      ],
+      "selected_tokens_estimated": 81,
+      "source_tokens_estimated": 111,
+      "status": "matched",
+      "token_reduction_estimated": 0.2702702702702703
+    }
+  },
+  {
+    "id": "document-fidelity",
+    "metrics": {
+      "dynamic_facet_coverage": 0.75,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.47619047619047616,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.30508474576271183
+    },
+    "mode": "economy",
+    "query": "扫描 PDF OCR 表格 图片 来源锚点 高保真转换",
+    "ranked_ids": [
+      "doc-anchor",
+      "doc-gate",
+      "doc-scan",
+      "doc-table",
+      "doc-image",
+      "noise-color",
+      "noise-social",
+      "noise-logo"
+    ],
+    "relevant_ids": [
+      "doc-anchor",
+      "doc-gate",
+      "doc-image",
+      "doc-scan",
+      "doc-table"
+    ],
+    "selection": {
+      "confidence": 0.75,
+      "evidence_precision": 1.0,
+      "facet_coverage": 0.75,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "doc-anchor",
+        "doc-gate",
+        "doc-scan",
+        "doc-table",
+        "doc-image"
+      ],
+      "selected_tokens_estimated": 82,
+      "source_tokens_estimated": 118,
+      "status": "partial-evidence",
+      "token_reduction_estimated": 0.30508474576271183
+    }
+  },
+  {
+    "id": "code-review",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.2545454545454545
+    },
+    "mode": "economy",
+    "query": "review deployment dependency security error configuration tests",
+    "ranked_ids": [
+      "code-test",
+      "code-dep",
+      "code-error",
+      "code-sec",
+      "code-entry",
+      "noise-css",
+      "noise-copy",
+      "noise-sales"
+    ],
+    "relevant_ids": [
+      "code-dep",
+      "code-entry",
+      "code-error",
+      "code-sec",
+      "code-test"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "code-test",
+        "code-dep",
+        "code-error",
+        "code-sec",
+        "code-entry"
+      ],
+      "selected_tokens_estimated": 82,
+      "source_tokens_estimated": 110,
+      "status": "matched",
+      "token_reduction_estimated": 0.2545454545454545
+    }
+  },
+  {
+    "id": "video-evidence",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.48,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.27350427350427353
+    },
+    "mode": "economy",
+    "query": "视频 转写 时间戳 关键帧 画面 OCR 语义 证据",
+    "ranked_ids": [
+      "vid-anchor",
+      "vid-asr",
+      "vid-ocr",
+      "vid-scene",
+      "vid-vlm",
+      "noise-music",
+      "noise-avatar",
+      "noise-footer"
+    ],
+    "relevant_ids": [
+      "vid-anchor",
+      "vid-asr",
+      "vid-ocr",
+      "vid-scene",
+      "vid-vlm"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "vid-anchor",
+        "vid-asr",
+        "vid-ocr",
+        "vid-scene",
+        "vid-vlm"
+      ],
+      "selected_tokens_estimated": 85,
+      "source_tokens_estimated": 117,
+      "status": "matched",
+      "token_reduction_estimated": 0.27350427350427353
+    }
+  },
+  {
+    "id": "incident-response",
+    "metrics": {
+      "dynamic_facet_coverage": 0.8888888888888888,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.42105263157894735,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.28
+    },
+    "mode": "economy",
+    "query": "incident root cause affected systems mitigation validation owner",
+    "ranked_ids": [
+      "inc-impact",
+      "inc-cause",
+      "inc-owner",
+      "inc-check",
+      "inc-fix",
+      "noise-theme",
+      "noise-event",
+      "noise-print"
+    ],
+    "relevant_ids": [
+      "inc-cause",
+      "inc-check",
+      "inc-fix",
+      "inc-impact",
+      "inc-owner"
+    ],
+    "selection": {
+      "confidence": 0.8888888888888888,
+      "evidence_precision": 1.0,
+      "facet_coverage": 0.8888888888888888,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "inc-impact",
+        "inc-cause",
+        "inc-owner",
+        "inc-check",
+        "inc-fix"
+      ],
+      "selected_tokens_estimated": 72,
+      "source_tokens_estimated": 100,
+      "status": "partial-evidence",
+      "token_reduction_estimated": 0.28
+    }
+  },
+  {
+    "id": "frontend-quality",
+    "metrics": {
+      "dynamic_facet_coverage": 0.875,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.875,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.2844036697247706
+    },
+    "mode": "economy",
+    "query": "frontend accessibility responsive contrast typography interaction states",
+    "ranked_ids": [
+      "ui-state",
+      "ui-responsive",
+      "ui-type",
+      "ui-contrast",
+      "ui-a11y",
+      "noise-db",
+      "noise-audio",
+      "noise-legal"
+    ],
+    "relevant_ids": [
+      "ui-a11y",
+      "ui-contrast",
+      "ui-responsive",
+      "ui-state",
+      "ui-type"
+    ],
+    "selection": {
+      "confidence": 0.875,
+      "evidence_precision": 1.0,
+      "facet_coverage": 0.875,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "ui-state",
+        "ui-responsive",
+        "ui-type",
+        "ui-contrast",
+        "ui-a11y"
+      ],
+      "selected_tokens_estimated": 78,
+      "source_tokens_estimated": 109,
+      "status": "partial-evidence",
+      "token_reduction_estimated": 0.2844036697247706
+    }
+  },
+  {
+    "id": "financial-reconciliation",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.32999999999999996
+    },
+    "mode": "economy",
+    "query": "invoice reconciliation approved pending total anomaly audit",
+    "ranked_ids": [
+      "fin-approved",
+      "fin-pending",
+      "fin-audit",
+      "fin-anomaly",
+      "fin-total",
+      "noise-video",
+      "noise-font",
+      "noise-cache"
+    ],
+    "relevant_ids": [
+      "fin-anomaly",
+      "fin-approved",
+      "fin-audit",
+      "fin-pending",
+      "fin-total"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "fin-approved",
+        "fin-pending",
+        "fin-audit",
+        "fin-anomaly",
+        "fin-total"
+      ],
+      "selected_tokens_estimated": 67,
+      "source_tokens_estimated": 100,
+      "status": "matched",
+      "token_reduction_estimated": 0.32999999999999996
+    }
+  },
+  {
+    "id": "contract-obligations",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.26530612244897955
+    },
+    "mode": "economy",
+    "query": "contract effective date termination amount approval audit obligation",
+    "ranked_ids": [
+      "law-date",
+      "law-amount",
+      "law-audit",
+      "law-term",
+      "law-approval",
+      "noise-chart",
+      "noise-search",
+      "noise-photo"
+    ],
+    "relevant_ids": [
+      "law-amount",
+      "law-approval",
+      "law-audit",
+      "law-date",
+      "law-term"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "law-date",
+        "law-amount",
+        "law-audit",
+        "law-term",
+        "law-approval"
+      ],
+      "selected_tokens_estimated": 72,
+      "source_tokens_estimated": 98,
+      "status": "matched",
+      "token_reduction_estimated": 0.26530612244897955
+    }
+  },
+  {
+    "id": "dynamic-web",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.27472527472527475
+    },
+    "mode": "economy",
+    "query": "dynamic webpage rendered main content citation screenshot source anchor",
+    "ranked_ids": [
+      "web-anchor",
+      "web-render",
+      "web-main",
+      "web-cite",
+      "web-shot",
+      "noise-team",
+      "noise-color",
+      "noise-price"
+    ],
+    "relevant_ids": [
+      "web-anchor",
+      "web-cite",
+      "web-main",
+      "web-render",
+      "web-shot"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "web-anchor",
+        "web-render",
+        "web-main",
+        "web-cite",
+        "web-shot"
+      ],
+      "selected_tokens_estimated": 66,
+      "source_tokens_estimated": 91,
+      "status": "matched",
+      "token_reduction_estimated": 0.27472527472527475
+    }
+  },
+  {
+    "id": "research-synthesis",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.4444444444444444,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.27884615384615385
+    },
+    "mode": "economy",
+    "query": "research method sample result limitation citation evidence",
+    "ranked_ids": [
+      "res-cite",
+      "res-limit",
+      "res-method",
+      "res-sample",
+      "res-result",
+      "noise-logo",
+      "noise-build",
+      "noise-social"
+    ],
+    "relevant_ids": [
+      "res-cite",
+      "res-limit",
+      "res-method",
+      "res-result",
+      "res-sample"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "res-cite",
+        "res-limit",
+        "res-method",
+        "res-sample",
+        "res-result"
+      ],
+      "selected_tokens_estimated": 75,
+      "source_tokens_estimated": 104,
+      "status": "matched",
+      "token_reduction_estimated": 0.27884615384615385
+    }
+  },
+  {
+    "id": "semantic-certificate-recovery",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.36923076923076925,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.32456140350877194
+    },
+    "mode": "economy",
+    "query": "What should operators do when encrypted traffic stops because machine identity is no longer valid?",
+    "ranked_ids": [
+      "sem-cert-check",
+      "sem-cert-restart",
+      "sem-cert-alert",
+      "sem-cert-cause",
+      "sem-cert-rotate",
+      "sem-noise-machine",
+      "sem-noise-traffic",
+      "sem-noise-identity"
+    ],
+    "relevant_ids": [
+      "sem-cert-alert",
+      "sem-cert-cause",
+      "sem-cert-check",
+      "sem-cert-restart",
+      "sem-cert-rotate"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "sem-cert-check",
+        "sem-cert-restart",
+        "sem-cert-alert",
+        "sem-cert-cause",
+        "sem-cert-rotate"
+      ],
+      "selected_tokens_estimated": 77,
+      "source_tokens_estimated": 114,
+      "status": "matched",
+      "token_reduction_estimated": 0.32456140350877194
+    }
+  },
+  {
+    "id": "semantic-scanned-report",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.25210084033613445,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.2790697674418605
+    },
+    "mode": "economy",
+    "query": "没有可复制文字的报告怎样保住表格和插图信息",
+    "ranked_ids": [
+      "sem-scan-table",
+      "sem-scan-anchor",
+      "sem-scan-detect",
+      "sem-scan-fallback",
+      "sem-scan-image",
+      "sem-noise-copy",
+      "sem-noise-print",
+      "sem-noise-chart"
+    ],
+    "relevant_ids": [
+      "sem-scan-anchor",
+      "sem-scan-detect",
+      "sem-scan-fallback",
+      "sem-scan-image",
+      "sem-scan-table"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "sem-scan-table",
+        "sem-scan-anchor",
+        "sem-scan-detect",
+        "sem-scan-fallback",
+        "sem-scan-image"
+      ],
+      "selected_tokens_estimated": 93,
+      "source_tokens_estimated": 129,
+      "status": "matched",
+      "token_reduction_estimated": 0.2790697674418605
+    }
+  },
+  {
+    "id": "semantic-context-proof",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.37142857142857144,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.29807692307692313
+    },
+    "mode": "economy",
+    "query": "prepare the smallest useful material while keeping proof",
+    "ranked_ids": [
+      "sem-context-fact",
+      "sem-context-task",
+      "sem-context-omit",
+      "sem-context-budget",
+      "sem-context-anchor",
+      "sem-noise-material",
+      "sem-noise-proof",
+      "sem-noise-small"
+    ],
+    "relevant_ids": [
+      "sem-context-anchor",
+      "sem-context-budget",
+      "sem-context-fact",
+      "sem-context-omit",
+      "sem-context-task"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "sem-context-fact",
+        "sem-context-task",
+        "sem-context-omit",
+        "sem-context-budget",
+        "sem-context-anchor"
+      ],
+      "selected_tokens_estimated": 73,
+      "source_tokens_estimated": 104,
+      "status": "matched",
+      "token_reduction_estimated": 0.29807692307692313
+    }
+  },
+  {
+    "id": "semantic-accessibility",
+    "metrics": {
+      "dynamic_facet_coverage": 1.0,
+      "dynamic_precision": 1.0,
+      "dynamic_recall": 1.0,
+      "dynamic_selected_count": 5.0,
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.43636363636363634,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0,
+      "selected_token_reduction_estimated": 0.3090909090909091
+    },
+    "mode": "economy",
+    "query": "make the interface usable without a mouse and readable on a phone",
+    "ranked_ids": [
+      "sem-ui-label",
+      "sem-ui-type",
+      "sem-ui-mobile",
+      "sem-ui-focus",
+      "sem-ui-keyboard",
+      "sem-noise-interface",
+      "sem-noise-mouse",
+      "sem-noise-phone"
+    ],
+    "relevant_ids": [
+      "sem-ui-focus",
+      "sem-ui-keyboard",
+      "sem-ui-label",
+      "sem-ui-mobile",
+      "sem-ui-type"
+    ],
+    "selection": {
+      "confidence": 1.0,
+      "evidence_precision": 1.0,
+      "facet_coverage": 1.0,
+      "relevant_recall": 1.0,
+      "selected_count": 5,
+      "selected_ids": [
+        "sem-ui-label",
+        "sem-ui-type",
+        "sem-ui-mobile",
+        "sem-ui-focus",
+        "sem-ui-keyboard"
+      ],
+      "selected_tokens_estimated": 76,
+      "source_tokens_estimated": 110,
+      "status": "matched",
+      "token_reduction_estimated": 0.3090909090909091
+    }
+  }
+]

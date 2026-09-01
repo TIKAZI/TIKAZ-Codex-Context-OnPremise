@@ -17,5 +17,4 @@ canonical artifact -> retrieve -> rerank -> protect -> optional prose compressio
 
 ## GPU policy
 
-The verified host has an NVIDIA GeForce RTX 5060 Ti with 16 GB VRAM. Whisper, VLM/OCR, embeddings, reranking, and learned compression are scheduled sequentially by default. Existing faster-whisper CUDA float16 remains the baseline because public RTX 50-series reports show INT8 compatibility failures on some CTranslate2/CUDA combinations.
-
+The verified host has an NVIDIA GeForce RTX 5060 Ti with 16 GB VRAM. Whisper, OCR, embeddings, reranking, learned compression, and Qwen3-VL are scheduled sequentially by default. Qwen3-VL 8B runs through loopback-only Ollama; the checked runtime reported its full 5,793,780,858-byte allocation in VRAM. PP-OCRv5 text and VLM observations remain separate, and only low-confidence, empty, ambiguous, or failed local visual results escalate to Codex. Existing faster-whisper CUDA float16 remains the ASR baseline because public RTX 50-series reports show INT8 compatibility failures on some CTranslate2/CUDA combinations.

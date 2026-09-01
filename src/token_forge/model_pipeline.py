@@ -12,6 +12,7 @@ from .conversion import _run_process
 from .cost import estimate_tokens
 from .pipeline import build_text_pack
 from .protection import extract_protected_literals, protected_recall
+from .retrieval import expanded_query_terms, fuse_and_diversify, query_coverage, retrieval_terms
 
 
 HIGH_RISK = {"code", "contract", "table", "financial", "command", "security"}
@@ -98,6 +99,75 @@ def _write_result(output_dir: Path, result: ModelPackResult) -> None:
     )
 
 
+def rank_local_chunks(
+    chunks: list[dict[str, object]],
+    query: str,
+    adapters: Mapping[str, str],
+    *,
+    timeout_seconds: int = 900,
+) -> list[dict[str, object]]:
+    return rank_local_chunk_batches(
+        [(chunks, query)], adapters, timeout_seconds=timeout_seconds
+    )[0]
+
+
+def rank_local_chunk_batches(
+    requests: list[tuple[list[dict[str, object]], str]],
+    adapters: Mapping[str, str],
+    *,
+    timeout_seconds: int = 900,
+) -> list[list[dict[str, object]]]:
+    required = ("retrieval_python", "embedding_model", "reranker_model")
+    missing = [name for name in required if not adapters.get(name)]
+    if missing:
+        raise RuntimeError(f"missing adapters: {', '.join(missing)}")
+    script_root = Path(__file__).resolve().parents[2] / "scripts"
+    retrieval = _run_helper(
+        adapters["retrieval_python"],
+        script_root / "retrieve_local.py",
+        {
+            "requests": [
+                {"query": query, "chunks": chunks} for chunks, query in requests
+            ],
+            "embedding_model": adapters["embedding_model"],
+            "reranker_model": adapters["reranker_model"],
+        },
+        timeout_seconds,
+    )
+    results = retrieval.get("results")
+    if results is None and len(requests) == 1 and isinstance(retrieval.get("ranked"), list):
+        results = [retrieval]
+    if not isinstance(results, list) or len(results) != len(requests):
+        raise RuntimeError("retrieval helper omitted batch results")
+    output: list[list[dict[str, object]]] = []
+    for (chunks, query), raw_result in zip(requests, results):
+        ranked = raw_result.get("ranked") if isinstance(raw_result, dict) else None
+        if not isinstance(ranked, list):
+            raise RuntimeError("retrieval helper omitted ranked chunks")
+        by_index = {int(chunk["index"]): chunk for chunk in chunks}
+        validated: list[dict[str, object]] = []
+        for item in ranked:
+            if not isinstance(item, dict):
+                raise RuntimeError("retrieval helper returned an invalid rank item")
+            index = int(item["index"])
+            expected = by_index.get(index)
+            if expected is None or str(item.get("id")) != expected["id"]:
+                raise RuntimeError("retrieval helper returned an invalid chunk identity")
+            validated.append(dict(item))
+        has_explicit_facets = len(expanded_query_terms(query)) > len(retrieval_terms(query))
+        fused = fuse_and_diversify(
+            chunks,
+            query,
+            model_ranked=validated,
+            model_weight=0.0 if has_explicit_facets else 10.0,
+            coverage_weight=0.0,
+            new_coverage_weight=0.0,
+            diversity_weight=0.0 if has_explicit_facets else 0.02,
+        )
+        output.append([{**item, "strategy": "hybrid-rrf-mmr"} for item in fused])
+    return output
+
+
 def optimize_text_pack(
     source: str,
     query: str,
@@ -130,35 +200,19 @@ def optimize_text_pack(
     chunks = _chunks(source)
     script_root = Path(__file__).resolve().parents[2] / "scripts"
     try:
-        retrieval = _run_helper(
-            adapters["retrieval_python"],
-            script_root / "retrieve_local.py",
-            {
-                "query": query,
-                "chunks": chunks,
-                "embedding_model": adapters["embedding_model"],
-                "reranker_model": adapters["reranker_model"],
-            },
-            timeout_seconds,
-        )
-        ranked = retrieval.get("ranked")
-        if not isinstance(ranked, list):
-            raise RuntimeError("retrieval helper omitted ranked chunks")
-
         by_index = {int(chunk["index"]): chunk for chunk in chunks}
         mandatory = {
             int(chunk["index"])
             for chunk in chunks
             if any(value in str(chunk["text"]) for value in protected)
         }
+        fused = rank_local_chunks(
+            chunks, query, adapters, timeout_seconds=timeout_seconds
+        )
         ordered = list(sorted(mandatory))
-        for item in ranked:
-            index = int(item["index"])
-            expected = by_index.get(index)
-            if expected is None or str(item.get("id")) != expected["id"]:
-                raise RuntimeError("retrieval helper returned an invalid chunk identity")
-            if index not in ordered:
-                ordered.append(index)
+        ordered.extend(
+            int(item["index"]) for item in fused if int(item["index"]) not in mandatory
+        )
 
         selection_budget = max(budget_tokens, math.ceil(budget_tokens * 1.25))
         selected: list[int] = list(sorted(mandatory))
@@ -234,6 +288,14 @@ def optimize_text_pack(
             source_hash=source_hash,
             chunk_ids=tuple(str(by_index[index]["id"]) for index in selected),
             fallback_reason=fallback_reason,
+            evidence={
+                "retrieval_strategy": "hybrid-rrf-mmr",
+                "retrieval_status": "matched" if selected else "insufficient-evidence",
+                "query_coverage": query_coverage(
+                    query, (str(by_index[index]["text"]) for index in selected)
+                ),
+                "selected_chunk_indexes": tuple(selected),
+            },
         )
     except (KeyError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
         result = _fallback(source, query, budget_tokens, safety_class, str(error))

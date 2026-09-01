@@ -1,0 +1,13 @@
+{
+  "case_count": 12,
+  "protected_fact_count": 37,
+  "combined_fact_recall": 1.0,
+  "ocr_fact_recall": 1.0,
+  "vlm_fact_recall": 1.0,
+  "frame_type_accuracy": 0.8333333333333334,
+  "resolved_local_rate": 1.0,
+  "codex_escalation_rate": 0.0,
+  "local_prompt_eval_count": 16236,
+  "local_runtime_seconds": 48.7780711,
+  "codex_image_token_savings": "Pending provider telemetry"
+}

@@ -181,7 +181,8 @@ def convert_zip(source: Path, limits: ArchiveLimits | None = None) -> str:
             for info, name in safe_members:
                 suffix = Path(name).suffix.lower()
                 kind = "nested archive (inventory only)" if suffix in _NESTED_ARCHIVES else ("text" if suffix in _TEXT_SUFFIXES else "binary")
-                lines.append(f"| {name.replace('|', '\\|')} | {kind} | {info.file_size} bytes |")
+                escaped_name = name.replace("|", r"\|")
+                lines.append(f"| {escaped_name} | {kind} | {info.file_size} bytes |")
                 if kind == "text":
                     readable.append((info, name))
 

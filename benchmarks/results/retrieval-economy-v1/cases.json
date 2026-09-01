@@ -1,0 +1,506 @@
+[
+  {
+    "id": "release-migration",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "release database migration rollback backup verification",
+    "ranked_ids": [
+      "rel-backup",
+      "rel-owner",
+      "rel-rollback",
+      "rel-command",
+      "rel-verify",
+      "noise-brand",
+      "noise-menu",
+      "noise-office"
+    ],
+    "relevant_ids": [
+      "rel-backup",
+      "rel-command",
+      "rel-owner",
+      "rel-rollback",
+      "rel-verify"
+    ]
+  },
+  {
+    "id": "document-fidelity",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.4878048780487805,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "扫描 PDF OCR 表格 图片 来源锚点 高保真转换",
+    "ranked_ids": [
+      "doc-anchor",
+      "doc-table",
+      "doc-gate",
+      "doc-image",
+      "doc-scan",
+      "noise-color",
+      "noise-social",
+      "noise-logo"
+    ],
+    "relevant_ids": [
+      "doc-anchor",
+      "doc-gate",
+      "doc-image",
+      "doc-scan",
+      "doc-table"
+    ]
+  },
+  {
+    "id": "code-review",
+    "metrics": {
+      "evidence_precision": 0.8,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 0.8687949224876581,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.8,
+      "query_coverage": 0.8571428571428571,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 0.8
+    },
+    "mode": "economy",
+    "query": "review deployment dependency security error configuration tests",
+    "ranked_ids": [
+      "code-test",
+      "code-dep",
+      "code-sec",
+      "code-error",
+      "noise-sales",
+      "code-entry",
+      "noise-css",
+      "noise-copy"
+    ],
+    "relevant_ids": [
+      "code-dep",
+      "code-entry",
+      "code-error",
+      "code-sec",
+      "code-test"
+    ]
+  },
+  {
+    "id": "video-evidence",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.48,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "视频 转写 时间戳 关键帧 画面 OCR 语义 证据",
+    "ranked_ids": [
+      "vid-anchor",
+      "vid-asr",
+      "vid-ocr",
+      "vid-scene",
+      "vid-vlm",
+      "noise-music",
+      "noise-avatar",
+      "noise-footer"
+    ],
+    "relevant_ids": [
+      "vid-anchor",
+      "vid-asr",
+      "vid-ocr",
+      "vid-scene",
+      "vid-vlm"
+    ]
+  },
+  {
+    "id": "incident-response",
+    "metrics": {
+      "evidence_precision": 0.8,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 0.8687949224876581,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.8,
+      "query_coverage": 0.75,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 0.8
+    },
+    "mode": "economy",
+    "query": "incident root cause affected systems mitigation validation owner",
+    "ranked_ids": [
+      "inc-impact",
+      "inc-cause",
+      "inc-owner",
+      "inc-fix",
+      "noise-theme",
+      "noise-print",
+      "inc-check",
+      "noise-event"
+    ],
+    "relevant_ids": [
+      "inc-cause",
+      "inc-check",
+      "inc-fix",
+      "inc-impact",
+      "inc-owner"
+    ]
+  },
+  {
+    "id": "frontend-quality",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.8571428571428571,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "frontend accessibility responsive contrast typography interaction states",
+    "ranked_ids": [
+      "ui-state",
+      "ui-responsive",
+      "ui-contrast",
+      "ui-type",
+      "ui-a11y",
+      "noise-db",
+      "noise-audio",
+      "noise-legal"
+    ],
+    "relevant_ids": [
+      "ui-a11y",
+      "ui-contrast",
+      "ui-responsive",
+      "ui-state",
+      "ui-type"
+    ]
+  },
+  {
+    "id": "financial-reconciliation",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "invoice reconciliation approved pending total anomaly audit",
+    "ranked_ids": [
+      "fin-approved",
+      "fin-anomaly",
+      "fin-pending",
+      "fin-audit",
+      "fin-total",
+      "noise-font",
+      "noise-video",
+      "noise-cache"
+    ],
+    "relevant_ids": [
+      "fin-anomaly",
+      "fin-approved",
+      "fin-audit",
+      "fin-pending",
+      "fin-total"
+    ]
+  },
+  {
+    "id": "contract-obligations",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 1.0,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "contract effective date termination amount approval audit obligation",
+    "ranked_ids": [
+      "law-date",
+      "law-amount",
+      "law-approval",
+      "law-term",
+      "law-audit",
+      "noise-search",
+      "noise-chart",
+      "noise-photo"
+    ],
+    "relevant_ids": [
+      "law-amount",
+      "law-approval",
+      "law-audit",
+      "law-date",
+      "law-term"
+    ]
+  },
+  {
+    "id": "dynamic-web",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.7777777777777778,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "dynamic webpage rendered main content citation screenshot source anchor",
+    "ranked_ids": [
+      "web-render",
+      "web-anchor",
+      "web-main",
+      "web-shot",
+      "web-cite",
+      "noise-color",
+      "noise-team",
+      "noise-price"
+    ],
+    "relevant_ids": [
+      "web-anchor",
+      "web-cite",
+      "web-main",
+      "web-render",
+      "web-shot"
+    ]
+  },
+  {
+    "id": "research-synthesis",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.3333333333333333,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "research method sample result limitation citation evidence",
+    "ranked_ids": [
+      "res-cite",
+      "res-method",
+      "res-sample",
+      "res-limit",
+      "res-result",
+      "noise-logo",
+      "noise-build",
+      "noise-social"
+    ],
+    "relevant_ids": [
+      "res-cite",
+      "res-limit",
+      "res-method",
+      "res-result",
+      "res-sample"
+    ]
+  },
+  {
+    "id": "semantic-certificate-recovery",
+    "metrics": {
+      "evidence_precision": 0.4,
+      "mrr": 0.25,
+      "ndcg_at_1": 0.0,
+      "ndcg_at_3": 0.0,
+      "ndcg_at_5": 0.27727342735504823,
+      "precision_at_1": 0.0,
+      "precision_at_3": 0.0,
+      "precision_at_5": 0.4,
+      "query_coverage": 0.26666666666666666,
+      "recall_at_1": 0.0,
+      "recall_at_3": 0.0,
+      "recall_at_5": 0.4
+    },
+    "mode": "economy",
+    "query": "What should operators do when encrypted traffic stops because machine identity is no longer valid?",
+    "ranked_ids": [
+      "sem-noise-machine",
+      "sem-noise-identity",
+      "sem-noise-traffic",
+      "sem-cert-alert",
+      "sem-cert-cause",
+      "sem-cert-rotate",
+      "sem-cert-check",
+      "sem-cert-restart"
+    ],
+    "relevant_ids": [
+      "sem-cert-alert",
+      "sem-cert-cause",
+      "sem-cert-check",
+      "sem-cert-restart",
+      "sem-cert-rotate"
+    ]
+  },
+  {
+    "id": "semantic-scanned-report",
+    "metrics": {
+      "evidence_precision": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 1.0,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "query_coverage": 0.20202020202020202,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 1.0
+    },
+    "mode": "economy",
+    "query": "没有可复制文字的报告怎样保住表格和插图信息",
+    "ranked_ids": [
+      "sem-scan-anchor",
+      "sem-scan-detect",
+      "sem-scan-table",
+      "sem-scan-image",
+      "sem-scan-fallback",
+      "sem-noise-copy",
+      "sem-noise-print",
+      "sem-noise-chart"
+    ],
+    "relevant_ids": [
+      "sem-scan-anchor",
+      "sem-scan-detect",
+      "sem-scan-fallback",
+      "sem-scan-image",
+      "sem-scan-table"
+    ]
+  },
+  {
+    "id": "semantic-context-proof",
+    "metrics": {
+      "evidence_precision": 0.6,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 0.7039180890341348,
+      "ndcg_at_5": 0.6548086577531306,
+      "precision_at_1": 1.0,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.6,
+      "query_coverage": 0.2222222222222222,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.4,
+      "recall_at_5": 0.6
+    },
+    "mode": "economy",
+    "query": "prepare the smallest useful material while keeping proof",
+    "ranked_ids": [
+      "sem-context-fact",
+      "sem-noise-material",
+      "sem-context-omit",
+      "sem-context-budget",
+      "sem-noise-proof",
+      "sem-context-anchor",
+      "sem-context-task",
+      "sem-noise-small"
+    ],
+    "relevant_ids": [
+      "sem-context-anchor",
+      "sem-context-budget",
+      "sem-context-fact",
+      "sem-context-omit",
+      "sem-context-task"
+    ]
+  },
+  {
+    "id": "semantic-accessibility",
+    "metrics": {
+      "evidence_precision": 0.8,
+      "mrr": 1.0,
+      "ndcg_at_1": 1.0,
+      "ndcg_at_3": 1.0,
+      "ndcg_at_5": 0.8539316501572934,
+      "precision_at_1": 1.0,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.8,
+      "query_coverage": 0.35294117647058826,
+      "recall_at_1": 0.2,
+      "recall_at_3": 0.6,
+      "recall_at_5": 0.8
+    },
+    "mode": "economy",
+    "query": "make the interface usable without a mouse and readable on a phone",
+    "ranked_ids": [
+      "sem-ui-type",
+      "sem-ui-label",
+      "sem-ui-mobile",
+      "sem-noise-interface",
+      "sem-ui-keyboard",
+      "sem-ui-focus",
+      "sem-noise-mouse",
+      "sem-noise-phone"
+    ],
+    "relevant_ids": [
+      "sem-ui-focus",
+      "sem-ui-keyboard",
+      "sem-ui-label",
+      "sem-ui-mobile",
+      "sem-ui-type"
+    ]
+  }
+]

@@ -1,4 +1,4 @@
-# Local installation status (2026-08-20)
+# Local installation status (2026-08-22)
 
 ## Package and command layer
 
@@ -7,12 +7,14 @@
 | MarkItDown | 0.1.7 | DOCX, PPTX, XLSX, EPUB, HTML fallback, and born-digital PDF passed | binary PDF remains output-only without an independent source extractor |
 | Docling | 2.120.1 | command/version passed; PDF smoke timed out while fetching layout model | disabled without local artifacts; remote fetch requires explicit opt-in |
 | MinerU | 3.4.5 | local `pipeline + ocr` route passed one fixed clear scan | degraded, rotated, table, figure, and real-document gates pending |
-| PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | CLI exposes Office `doc2md` and cloud API | installed CLI is not a local scanned-PDF OCR route |
+| PaddleOCR | 3.7.0 + PaddlePaddle 3.3.1 | PP-OCRv5 mobile detection/recognition passed the 12-image visual suite | 37 / 37 declared visual facts; clear synthetic fixtures only |
 | Defuddle | 0.19.2 | static HTML and Playwright-rendered dynamic-page fixtures passed | arbitrary/authenticated sites pending |
 | Playwright | 1.62.1 + Chromium 1234 local assets | dynamic-page render + Defuddle smoke passed | authenticated/private pages and broader dynamic fixtures pending |
-| yt-dlp | 2026.07.04 | version passed | authorized platform fixture pending |
+| yt-dlp | 2026.07.04 | explicit-network Bilibili metadata fixture passed in 2.650 s; no media downloaded | subtitles unavailable on checked public URL; authenticated or broader platform cases remain separate |
 | PySceneDetect | 0.7.1 | real local video produced 7 scenes and 21 keyframes | broader codec/transition fixtures pending |
 | faster-whisper | existing large-v3 | CUDA media route and generated English audio/video WER fixtures passed | multilingual, noisy, and long-form WER fixtures pending |
+| Ollama + Qwen3-VL | 0.32.14 + Qwen3-VL 8B Q4_K_M | loopback structured inference loaded fully in VRAM on RTX 5060 Ti | 37 / 37 VLM facts, 10 / 12 frame types, 12 / 12 locally resolved on fixed synthetic suite |
+| Visual evidence handoff | dependency-free controller + local OCR/VLM + image-capable Codex host | exact SHA-256 frame dedup, scene-first budget, hash validation, and fallback routing passed | perceptual dedup, decorative skip, real-world QA, and provider telemetry pending |
 | FlagEmbedding / Sentence Transformers | 1.4.0 / 5.7.0 | BGE-M3 and BGE reranker loaded fully offline | fixed retrieval/reranking fixtures passed |
 | LLMLingua | 0.2.2 | local XLM-RoBERTa model loaded and compressed prose offline | fixed low-risk compression fixtures passed |
 
@@ -24,9 +26,11 @@ The three approved local models are complete on G: and passed offline loading. B
 
 The versioned v1 manifest ran 20 cases. All 18 required local routes passed, and the complete local set passed 19/19. Required-case denominators were 51 protected facts, 11 source anchors, and 9 table cells, each with recall `1.0`. Two controlled OCR fixtures measured mean CER `0.00%`; generated English audio and video measured mean WER `5.88%`, transcript fact recall `6/6`, and the video produced six keyframes. Seven comparable context cases measured `89.57%` token-weighted reduction and `55.96%` macro mean, with both intentional small-input 0% pass-throughs retained.
 
-The generated scale fixtures measured `81.53%` deterministic long-text reduction, `91.05%` exact Python AST slicing, and `97.15%` reconciled CSV aggregation. Their profile-weighted results, including the small 0% cases, were `74.15%`, `84.19%`, and `96.00%` respectively. These are fixture-specific deterministic estimates, not universal savings.
+The generated scale fixtures measured `81.53%` deterministic long-text reduction, `91.05%` exact Python AST slicing, and `97.15%` reconciled CSV aggregation. Their profile-weighted results, including the small 0% cases, were `74.15%`, `84.19%`, and `96.00%` respectively. The fixed video routed six source frames to two selected frames and skipped four exact duplicates (`66.67%` of source frames); this is not image-token telemetry or semantic accuracy. These are fixture-specific deterministic estimates, not universal savings.
 
-EML and bounded ZIP now pass their declared local source-literal gates. The opt-in public-platform case remains `Pending`. See `docs/BENCHMARK.md` and `benchmarks/results/acceptance-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, visual understanding, authenticated-site support, or multilingual/noisy ASR quality.
+EML and bounded ZIP now pass their declared local source-literal gates. The explicitly authorized public-platform metadata case also passed: the checked Bilibili URL returned metadata in 2.650 seconds, without a subtitle track or any media download. Automatic local visual inference is enabled through PP-OCRv5 mobile plus Qwen3-VL 8B over loopback Ollama. On the separate 12-image suite, OCR, VLM, and combined protected-fact recall were each `37/37`, local resolution was `12/12`, and dominant frame-type accuracy was `10/12`. Two identical-setting runs produced identical per-case fact and type results. See `docs/BENCHMARK.md`, `benchmarks/results/acceptance-v1`, and `benchmarks/results/visual-v1`. These figures are fixture-specific and do not establish provider billing savings, general OCR/layout fidelity, authenticated-site support, or multilingual/noisy ASR quality.
+
+The checked Ollama process reported Qwen3-VL's complete 5,793,780,858-byte runtime allocation in VRAM; total GPU memory use during inference was about 8.33 GiB with 96–97% utilization. Aggregate Ollama-reported VLM duration was 48.852 seconds in run A and 48.755 seconds in run B. Windows WDDM did not expose trustworthy per-process memory through `nvidia-smi`, so the report uses Ollama's `size_vram` plus total-device telemetry instead of inventing a process figure.
 
 ## Verified conversion slice
 
@@ -42,7 +46,7 @@ After local MinerU pipeline models were configured, the bilingual image-only fix
 
 The first real run exposed a Windows process-lifecycle defect: MinerU wrote its Markdown but inherited output pipes prevented the command from completing. The runner now captures output through temporary files and places Windows adapters in a kill-on-close Job Object before resuming them. Regression tests cover both timeout cleanup and the case where a short-lived parent exits before a pipe-inheriting child.
 
-The dynamic-page smoke now uses the cached local Chromium 1234 assets under `G:\CodexTools\models\token-forge\playwright`; the first attempt correctly failed when that browser path was not exported, then passed after the local path was configured. The media smoke used `F:\CodexVideoSummary\data\media\BV1TU3g66Exd.mp4` as a read-only source and wrote its transcript, scene CSV, and keyframes under `F:\TIKAZ-Token-Forge-Data\outputs\media-smoke-cpu2`.
+The dynamic-page smoke used a pinned local Chromium 1234 runtime; the first attempt correctly failed when the browser path was not configured, then passed after a local path was supplied. The media smoke used a local redistribution-safe fixture as a read-only source and wrote its transcript, scene CSV, and keyframes to an ignored output directory.
 
 The fixed four-case model benchmark completed three low-risk model routes and one code safety pass-through. Estimated input to final tokens were `106 -> 68`, `509 -> 85`, `147 -> 55`, and `91 -> 91`; declared protected-fact recall was `1.0` for every case. `doctor.model_gates` reports both retrieval and learned compression as `validated: true` when pointed at this local report. See `benchmarks/results/model-results.json`. These are fixture-specific deterministic estimates, not provider telemetry or a universal saving/accuracy claim.
 

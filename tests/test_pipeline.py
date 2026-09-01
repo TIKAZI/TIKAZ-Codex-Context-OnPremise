@@ -6,6 +6,51 @@ from token_forge.pipeline import build_text_pack
 
 
 class PipelineTests(unittest.TestCase):
+    def test_text_pack_uses_dynamic_top_k_instead_of_filling_the_budget(self):
+        source = """# Combined evidence
+Backup the database, run rollback_db.py after failure, and verify MIGRATION_OK.
+
+# Owner
+The release owner records the verification result.
+
+# Duplicate
+A second note repeats rollback and verification without adding evidence.
+
+# Design
+The landing page uses a blue background and rounded cards for the campaign.
+
+# Office
+The office coffee machine is serviced every month by the facilities team.
+
+# Marketing
+Campaign traffic increased after the new visual identity launched.
+"""
+
+        result = build_text_pack(
+            source,
+            "database backup rollback verification owner",
+            budget_tokens=80,
+            query_variants=("database backup rollback verification", "release owner"),
+        )
+
+        self.assertEqual(result.mode, "selected")
+        self.assertIn("Combined evidence", result.text)
+        self.assertIn("# Owner", result.text)
+        self.assertNotIn("# Duplicate", result.text)
+        self.assertEqual(result.evidence["retrieval_status"], "matched")
+        self.assertEqual(result.evidence["dynamic_top_k"], 2)
+        self.assertEqual(result.evidence["facet_coverage"], 1.0)
+
+    def test_no_query_evidence_falls_back_visibly_instead_of_selecting_noise(self):
+        labels = "abcdefghijklmnopqrst"
+        source = "\n\n".join(
+            f"# Section {label}\nDecorative campaign copy {label}." for label in labels
+        )
+        result = build_text_pack(source, "database rollback evidence", 40)
+        self.assertEqual(result.mode, "insufficient-evidence")
+        self.assertTrue(result.budget_conflict)
+        self.assertEqual(result.evidence["retrieval_status"], "insufficient-evidence")
+
     def test_text_uses_minimum_fact_cover_instead_of_every_repeated_fact_block(self):
         source = """# Release evidence
 Deploy v3.4.5 after database backup.
