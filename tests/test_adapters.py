@@ -12,7 +12,7 @@ class AdapterTests(unittest.TestCase):
             executable.write_bytes(b"")
             status = probe_adapter(AdapterSpec("fixture", (str(executable),)))
             self.assertTrue(status.available)
-            self.assertEqual(Path(status.executable), executable)
+            self.assertTrue(Path(status.executable).samefile(executable))
 
     def test_probe_reports_missing_adapter_without_installing(self):
         status = probe_adapter(AdapterSpec("missing", ("definitely-not-installed-token-forge",)))
