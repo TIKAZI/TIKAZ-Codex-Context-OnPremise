@@ -1,0 +1,49 @@
+{
+  "schema_version": "model-profiles/v1",
+  "registry_version": "2026-11-13",
+  "purpose": "Historical fixture profiles; a registry match never proves that the current runtime or weight file is present.",
+  "profiles": [
+    {
+      "id": "qwen3-vl:8b",
+      "family": "Qwen3-VL",
+      "kind": "vision-language",
+      "runtime": "ollama-loopback",
+      "capabilities": ["image-understanding", "structured-observation", "ocr-cross-check"],
+      "validation": "fixture-validated",
+      "status": "tested-default"
+    },
+    {
+      "id": "bge-m3",
+      "family": "BGE-M3",
+      "kind": "embedding",
+      "runtime": "local-python",
+      "capabilities": ["multilingual-retrieval"],
+      "validation": "fixture-configurable",
+      "status": "optional"
+    },
+    {
+      "id": "bge-reranker-v2-m3",
+      "family": "BGE Reranker v2",
+      "kind": "reranker",
+      "runtime": "local-python",
+      "capabilities": ["multilingual-reranking"],
+      "validation": "fixture-configurable",
+      "status": "optional"
+    },
+    {
+      "id": "llmlingua-2",
+      "family": "LLMLingua-2",
+      "kind": "compression",
+      "runtime": "local-python",
+      "capabilities": ["guarded-prose-compression"],
+      "validation": "fixture-configurable",
+      "status": "optional"
+    }
+  ],
+  "observability": {
+    "requested_model": "config-value",
+    "actual_model": "runtime-report-or-UNVERIFIED",
+    "fallback": "deterministic-and-visible"
+  }
+}
+

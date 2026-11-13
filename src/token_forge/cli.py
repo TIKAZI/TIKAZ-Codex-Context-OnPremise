@@ -9,6 +9,7 @@ from .adapters import probe_all
 from .acceptance import run_acceptance_manifest
 from .benchmark import run_manifest, run_model_manifest
 from .config import LocalConfig, load_config
+from .model_profiles import describe_model
 from .conversion import convert_source
 from .media import process_local_media
 from .model_pipeline import optimize_text_pack
@@ -242,6 +243,7 @@ def _visual_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
         and not parsed_host.fragment
     )
     eligible = runtime_ready and ocr_ready and bool(model) and loopback
+    profile = describe_model(model)
     validated = False
     report_path = config.adapters.get("visual_validation")
     if eligible and report_path and Path(report_path).is_file():
@@ -267,6 +269,7 @@ def _visual_gates(config: LocalConfig) -> dict[str, dict[str, object]]:
                 "validated" if validated else "configured-unvalidated" if eligible else "not-configured"
             ),
             "model": model or None,
+            "model_profile": profile,
             "reason": (
                 "independent visual-fact validation passed"
                 if validated
@@ -295,6 +298,11 @@ def main(argv: list[str] | None = None) -> int:
             "conversion_gates": _conversion_gates(config),
             "model_gates": _model_gates(config),
             "visual_gates": _visual_gates(config),
+            "model_profiles": {
+                key: describe_model(config.adapters.get(key, ""))
+                for key in ("ollama_model", "embedding_model", "reranker_model", "llmlingua_model")
+                if config.adapters.get(key)
+            },
         }
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return 0
@@ -437,3 +445,4 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if result["all_required_pass"] else 2
     return 1
+

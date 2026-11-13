@@ -80,6 +80,10 @@ python -m token_forge benchmark-visual `
 
 `doctor` reports command installation separately from `conversion_gates`, `model_gates`, and `visual_gates`, so an installed executable or partial model directory is not presented as ready. `model_gates.*.eligible` means the configured runtime, model config, and substantial weight file are present; it remains `validated: false` until an explicit offline load test is recorded. `visual_gates` distinguishes `not-configured`, `configured-unvalidated`, and fixture-validated local vision from the always-available hash handoff and opt-in-only remote vision.
 
+### Capability-first local model profiles
+
+The packaged [`model-profiles.json`](src/token_forge/data/model-profiles.json) describes the historically tested `qwen3-vl:8b` profile and optional retrieval/compression families. It provides diagnostic metadata; it does not replace the configured model or gate an existing local adapter. `token-forge doctor` reports the configured profile, installed adapters, and current fixture validation separately. Unknown model names stay `unknown-unverified`, and deterministic/source-preserving fallback remains the completion path when a local model is unavailable.
+
 `optimize` assigns stable content-derived chunk IDs, runs BGE-M3 dense retrieval and BGE reranking in an isolated local process, and only then considers LLMLingua-2 when selected low-risk prose still exceeds the budget. Learned output is rejected if it is empty, exceeds the budget, or drops a protected number, date, version, URL, command, or citation literal. Code, commands, contracts, tables, financial material, and security evidence bypass learned models. Any model failure falls back visibly to the deterministic selector and records the reason in `model-ledger.json`. Helpers force Hugging Face and Transformers offline mode; they never acquire models during an `optimize` run.
 
 Retrieval quality is measured independently from compression. Dependency-free ContextEconomy v2 reached **100% Recall@5 / 100% Precision@5** on the committed 14-case bilingual development manifest. A separately frozen 12-case adversarial challenge reached **94.44% Recall@3 / 94.44% Precision@3**, with both misses retained in the raw cases. Conservative dynamic selection paired **100% selected-evidence recall** with **28.77% estimated candidate-text reduction** on the development set; the challenge paired **94.44% recall** with **39.01% estimated reduction**. These fixture results are not universal search accuracy, downstream-answer correctness, or Provider Token telemetry. See [`docs/RETRIEVAL_QUALITY.md`](docs/RETRIEVAL_QUALITY.md) and the raw result directories.
@@ -143,3 +147,4 @@ The local dynamic-page smoke completed through Playwright Chromium 1234 -> Defud
 $env:PYTHONPATH='src'
 python -m token_forge benchmark --manifest benchmarks\manifest.json --output benchmark-results
 ```
+

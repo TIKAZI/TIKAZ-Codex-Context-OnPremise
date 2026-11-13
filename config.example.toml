@@ -13,6 +13,8 @@ paddleocr_cache = '<MODELS_ROOT>\\paddlex'
 ollama = '<TOOLS_ROOT>\\ollama\\ollama.exe'
 ollama_host = 'http://127.0.0.1:11434'
 ollama_model = 'qwen3-vl:8b'
+# Capability-first profile lookup is informational until a fixture validation
+# report names the exact runtime and weights. Unknown names remain unverified.
 ollama_models = '<MODELS_ROOT>\\ollama'
 visual_validation = '<DATA_ROOT>\\outputs\\visual-benchmark\\summary.json'
 defuddle = '<NODE_ROOT>\\node_modules\\.bin\\defuddle.CMD'
@@ -31,3 +33,4 @@ output_root = '<DATA_ROOT>\\outputs'
 [runtime]
 gpu_serial = true
 allow_remote = false
+
